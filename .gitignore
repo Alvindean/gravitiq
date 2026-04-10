@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# Local database files are tracked as seed data
+# They will be modified at runtime when running locally

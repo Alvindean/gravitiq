@@ -1,4 +1,7 @@
 // POST /api/auth/signup — Register a new user
+
+import { readDocument, writeDocument } from '@/app/lib/db';
+
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -24,24 +27,39 @@ export async function POST(request) {
       );
     }
 
-    // Mock: pretend this email is already taken
-    if (email === 'taken@example.com') {
+    // Check if profile email already matches (mock duplicate check)
+    const profile = await readDocument('profile');
+    if (profile.email === email) {
       return Response.json(
         { success: false, error: 'An account with this email already exists' },
         { status: 409 }
       );
     }
 
-    const userId = `usr_${Date.now().toString(36)}`;
+    const userId = 'usr_' + Date.now().toString(36);
+    const now = new Date().toISOString();
+
+    // Update profile with new user data
+    const updatedProfile = {
+      ...profile,
+      id: userId,
+      name: name.trim(),
+      email,
+      plan: 'free',
+      createdAt: now,
+      updatedAt: now,
+    };
+    await writeDocument('profile', updatedProfile);
+
     const user = {
       id: userId,
       name: name.trim(),
       email,
       role: 'owner',
       avatar: null,
-      company: null,
+      company: updatedProfile.company || null,
       plan: 'free',
-      createdAt: new Date().toISOString(),
+      createdAt: now,
     };
 
     const token =

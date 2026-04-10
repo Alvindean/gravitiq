@@ -1,0 +1,8 @@
+[
+  { "id": "t1", "name": "Alvin Warren", "email": "alvin@gravitiq.io", "role": "owner", "status": "active", "joinedAt": "2025-06-01", "avatarColor": "#4F46E5" },
+  { "id": "t2", "name": "Maya Lin", "email": "maya@gravitiq.io", "role": "admin", "status": "active", "joinedAt": "2025-07-15", "avatarColor": "#059669" },
+  { "id": "t3", "name": "Jordan Hayes", "email": "jordan@gravitiq.io", "role": "member", "status": "active", "joinedAt": "2025-08-20", "avatarColor": "#DC2626" },
+  { "id": "t4", "name": "Sam Patel", "email": "sam@gravitiq.io", "role": "member", "status": "active", "joinedAt": "2025-09-10", "avatarColor": "#EA580C" },
+  { "id": "t5", "name": "Lena Kowalski", "email": "lena@gravitiq.io", "role": "member", "status": "active", "joinedAt": "2025-10-05", "avatarColor": "#7C3AED" },
+  { "id": "t6", "name": "Chris Nakamura", "email": "chris@gravitiq.io", "role": "viewer", "status": "invited", "joinedAt": "2026-04-08", "avatarColor": "#0891B2" }
+]

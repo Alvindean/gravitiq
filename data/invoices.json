@@ -1,0 +1,82 @@
+[
+  {
+    "id": "inv1", "invoiceNumber": "INV-2026-001", "clientId": "c3", "clientName": "Emily Chen",
+    "amount": 12500, "status": "paid", "issuedDate": "2026-01-15", "dueDate": "2026-02-14",
+    "items": [
+      { "description": "Security Audit - Phase 1", "quantity": 1, "rate": 7500, "amount": 7500 },
+      { "description": "Vulnerability Patching", "quantity": 10, "rate": 500, "amount": 5000 }
+    ]
+  },
+  {
+    "id": "inv2", "invoiceNumber": "INV-2026-002", "clientId": "c1", "clientName": "Sarah Mitchell",
+    "amount": 8500, "status": "paid", "issuedDate": "2026-02-01", "dueDate": "2026-03-03",
+    "items": [
+      { "description": "User Onboarding Flow - Design", "quantity": 1, "rate": 3500, "amount": 3500 },
+      { "description": "User Onboarding Flow - Development", "quantity": 1, "rate": 5000, "amount": 5000 }
+    ]
+  },
+  {
+    "id": "inv3", "invoiceNumber": "INV-2026-003", "clientId": "c8", "clientName": "Alex Nguyen",
+    "amount": 5200, "status": "paid", "issuedDate": "2026-02-15", "dueDate": "2026-03-17",
+    "items": [
+      { "description": "Payment Gateway Integration", "quantity": 1, "rate": 4000, "amount": 4000 },
+      { "description": "Testing & QA", "quantity": 8, "rate": 150, "amount": 1200 }
+    ]
+  },
+  {
+    "id": "inv4", "invoiceNumber": "INV-2026-004", "clientId": "c5", "clientName": "Olivia Parker",
+    "amount": 6800, "status": "paid", "issuedDate": "2026-03-01", "dueDate": "2026-03-31",
+    "items": [
+      { "description": "Landing Page Campaign - Design", "quantity": 3, "rate": 1500, "amount": 4500 },
+      { "description": "Copywriting & SEO", "quantity": 1, "rate": 2300, "amount": 2300 }
+    ]
+  },
+  {
+    "id": "inv5", "invoiceNumber": "INV-2026-005", "clientId": "c3", "clientName": "Emily Chen",
+    "amount": 15000, "status": "sent", "issuedDate": "2026-03-20", "dueDate": "2026-04-19",
+    "items": [
+      { "description": "Cloud Infrastructure Setup - AWS", "quantity": 1, "rate": 10000, "amount": 10000 },
+      { "description": "CI/CD Pipeline Configuration", "quantity": 1, "rate": 5000, "amount": 5000 }
+    ]
+  },
+  {
+    "id": "inv6", "invoiceNumber": "INV-2026-006", "clientId": "c1", "clientName": "Sarah Mitchell",
+    "amount": 14000, "status": "sent", "issuedDate": "2026-04-01", "dueDate": "2026-05-01",
+    "items": [
+      { "description": "Website Redesign - Phase 1", "quantity": 1, "rate": 8000, "amount": 8000 },
+      { "description": "Homepage Mockups", "quantity": 4, "rate": 1500, "amount": 6000 }
+    ]
+  },
+  {
+    "id": "inv7", "invoiceNumber": "INV-2026-007", "clientId": "c2", "clientName": "James Rodriguez",
+    "amount": 9200, "status": "sent", "issuedDate": "2026-04-05", "dueDate": "2026-05-05",
+    "items": [
+      { "description": "API Integration - REST Endpoints", "quantity": 1, "rate": 5200, "amount": 5200 },
+      { "description": "API Documentation", "quantity": 1, "rate": 4000, "amount": 4000 }
+    ]
+  },
+  {
+    "id": "inv8", "invoiceNumber": "INV-2026-008", "clientId": "c7", "clientName": "Rachel Foster",
+    "amount": 7500, "status": "draft", "issuedDate": "2026-04-08", "dueDate": "2026-05-08",
+    "items": [
+      { "description": "E-commerce Storefront - Prototype", "quantity": 1, "rate": 5000, "amount": 5000 },
+      { "description": "Stripe Integration", "quantity": 1, "rate": 2500, "amount": 2500 }
+    ]
+  },
+  {
+    "id": "inv9", "invoiceNumber": "INV-2026-009", "clientId": "c4", "clientName": "Marcus Thompson",
+    "amount": 4200, "status": "overdue", "issuedDate": "2026-02-10", "dueDate": "2026-03-12",
+    "items": [
+      { "description": "Data Migration - Consultation", "quantity": 6, "rate": 500, "amount": 3000 },
+      { "description": "Architecture Documentation", "quantity": 1, "rate": 1200, "amount": 1200 }
+    ]
+  },
+  {
+    "id": "inv10", "invoiceNumber": "INV-2026-010", "clientId": "c5", "clientName": "Olivia Parker",
+    "amount": 5500, "status": "draft", "issuedDate": "2026-04-10", "dueDate": "2026-05-10",
+    "items": [
+      { "description": "Brand Identity - Logo Design", "quantity": 1, "rate": 3000, "amount": 3000 },
+      { "description": "Style Guide & Assets", "quantity": 1, "rate": 2500, "amount": 2500 }
+    ]
+  }
+]

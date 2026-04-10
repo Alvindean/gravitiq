@@ -1,0 +1,10 @@
+[
+  { "id": "c1", "name": "Sarah Mitchell", "company": "TechFlow Inc", "email": "sarah@techflow.io", "phone": "+1 (555) 234-5678", "status": "active", "revenue": 24300, "lastActivity": "2026-04-08", "avatarColor": "#4F46E5", "notes": "Key enterprise client" },
+  { "id": "c2", "name": "James Rodriguez", "company": "BrightPath Labs", "email": "james@brightpath.com", "phone": "+1 (555) 345-6789", "status": "active", "revenue": 18500, "lastActivity": "2026-04-06", "avatarColor": "#059669", "notes": "Expanding to Pro plan" },
+  { "id": "c3", "name": "Emily Chen", "company": "Quantum Dynamics", "email": "emily@quantumdyn.co", "phone": "+1 (555) 456-7890", "status": "active", "revenue": 31200, "lastActivity": "2026-04-09", "avatarColor": "#DC2626", "notes": "Largest revenue client" },
+  { "id": "c4", "name": "Marcus Thompson", "company": "Apex Ventures", "email": "marcus@apexvc.com", "phone": "+1 (555) 567-8901", "status": "inactive", "revenue": 8400, "lastActivity": "2026-03-14", "avatarColor": "#7C3AED", "notes": "On hold - budget review" },
+  { "id": "c5", "name": "Olivia Parker", "company": "Nova Creative", "email": "olivia@novacreative.io", "phone": "+1 (555) 678-9012", "status": "active", "revenue": 15600, "lastActivity": "2026-04-07", "avatarColor": "#EA580C", "notes": "Great referral source" },
+  { "id": "c6", "name": "Daniel Kim", "company": "Stellar Systems", "email": "daniel@stellarsys.com", "phone": "+1 (555) 789-0123", "status": "prospect", "revenue": 0, "lastActivity": "2026-04-04", "avatarColor": "#0891B2", "notes": "Demo scheduled next week" },
+  { "id": "c7", "name": "Rachel Foster", "company": "Luminary Design", "email": "rachel@luminarydesign.co", "phone": "+1 (555) 890-1234", "status": "active", "revenue": 12800, "lastActivity": "2026-04-05", "avatarColor": "#BE185D", "notes": "Loves the AI features" },
+  { "id": "c8", "name": "Alex Nguyen", "company": "Horizon Tech", "email": "alex@horizontech.dev", "phone": "+1 (555) 901-2345", "status": "inactive", "revenue": 5200, "lastActivity": "2026-02-27", "avatarColor": "#65A30D", "notes": "May reactivate in Q3" }
+]

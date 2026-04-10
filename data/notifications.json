@@ -1,0 +1,18 @@
+{
+  "email": {
+    "projectUpdates": true,
+    "invoiceReminders": true,
+    "clientMessages": true,
+    "teamActivity": false,
+    "weeklyDigest": true,
+    "marketingTips": false
+  },
+  "push": {
+    "projectUpdates": true,
+    "invoiceReminders": true,
+    "clientMessages": true,
+    "teamActivity": true,
+    "weeklyDigest": false,
+    "marketingTips": false
+  }
+}

@@ -1,0 +1,14 @@
+[
+  { "month": "Jul 2025", "revenue": 18200, "expenses": 12400 },
+  { "month": "Aug 2025", "revenue": 21500, "expenses": 13100 },
+  { "month": "Sep 2025", "revenue": 19800, "expenses": 12800 },
+  { "month": "Oct 2025", "revenue": 24100, "expenses": 14200 },
+  { "month": "Nov 2025", "revenue": 26300, "expenses": 14800 },
+  { "month": "Dec 2025", "revenue": 22700, "expenses": 15100 },
+  { "month": "Jan 2026", "revenue": 28400, "expenses": 15600 },
+  { "month": "Feb 2026", "revenue": 31200, "expenses": 16200 },
+  { "month": "Mar 2026", "revenue": 34800, "expenses": 16900 },
+  { "month": "Apr 2026", "revenue": 32100, "expenses": 17300 },
+  { "month": "May 2026", "revenue": 0, "expenses": 0 },
+  { "month": "Jun 2026", "revenue": 0, "expenses": 0 }
+]

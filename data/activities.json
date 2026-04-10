@@ -1,0 +1,12 @@
+[
+  { "id": "act1", "type": "project", "description": "Website Redesign progress updated to 65%", "timestamp": "2026-04-10T09:30:00", "link": "/dashboard/projects" },
+  { "id": "act2", "type": "client", "description": "New prospect added: Daniel Kim from Stellar Systems", "timestamp": "2026-04-10T08:45:00", "link": "/dashboard/clients" },
+  { "id": "act3", "type": "invoice", "description": "Invoice INV-2026-010 drafted for Nova Creative", "timestamp": "2026-04-10T08:00:00", "link": "/dashboard/invoices" },
+  { "id": "act4", "type": "ai", "description": "AI generated Q1 Revenue Analysis report", "timestamp": "2026-04-10T07:30:00", "link": "/dashboard/ai" },
+  { "id": "act5", "type": "team", "description": "Chris Nakamura invited to the team as viewer", "timestamp": "2026-04-08T14:00:00", "link": "/dashboard/team" },
+  { "id": "act6", "type": "project", "description": "Security Audit & Fixes marked as completed", "timestamp": "2026-04-07T17:00:00", "link": "/dashboard/projects" },
+  { "id": "act7", "type": "invoice", "description": "Invoice INV-2026-007 sent to James Rodriguez", "timestamp": "2026-04-05T10:00:00", "link": "/dashboard/invoices" },
+  { "id": "act8", "type": "client", "description": "Olivia Parker referred a new lead", "timestamp": "2026-04-04T12:30:00", "link": "/dashboard/clients" },
+  { "id": "act9", "type": "project", "description": "E-commerce Platform kicked off for Luminary Design", "timestamp": "2026-04-03T09:00:00", "link": "/dashboard/projects" },
+  { "id": "act10", "type": "invoice", "description": "Invoice INV-2026-004 payment received from Nova Creative", "timestamp": "2026-04-01T11:00:00", "link": "/dashboard/invoices" }
+]

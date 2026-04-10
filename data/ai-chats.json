@@ -1,0 +1,58 @@
+[
+  {
+    "id": "ai1", "title": "Q1 Revenue Analysis", "createdAt": "2026-04-10T08:00:00", "model": "gravitiq",
+    "messages": [
+      { "role": "user", "content": "Generate a summary of Q1 performance" },
+      { "role": "assistant", "content": "Here is your Q1 2026 performance summary:\n\n**Revenue:** $116,000 (+18% vs Q4 2025)\n**Active Clients:** 6 of 8 total\n**Projects Completed:** 4\n**Average Project Value:** $14,500\n\nTop performer: Emily Chen (Quantum Dynamics) at $31,200 in revenue. Client retention rate sits at 75%, with two accounts currently inactive. Pipeline looks strong with 4 projects in progress and 3 in review." }
+    ]
+  },
+  {
+    "id": "ai2", "title": "Client Retention Strategy", "createdAt": "2026-04-09T14:00:00", "model": "gravitiq",
+    "messages": [
+      { "role": "user", "content": "What strategies can I use to reactivate Marcus Thompson and Alex Nguyen?" },
+      { "role": "assistant", "content": "Here are targeted reactivation strategies for both clients:\n\n**Marcus Thompson (Apex Ventures)**\n- Offer a discounted pilot project to re-engage during budget review\n- Share case studies from similar venture capital clients\n- Schedule an informal check-in call to understand current needs\n\n**Alex Nguyen (Horizon Tech)**\n- Prepare a Q3 proposal with new feature highlights\n- Offer early access to upcoming platform features\n- Send a personalized recap of previous project successes\n\nBoth clients have existing relationships, so warm outreach with value-first messaging will be most effective." }
+    ]
+  },
+  {
+    "id": "ai3", "title": "Project Timeline Optimization", "createdAt": "2026-04-08T10:30:00", "model": "gravitiq",
+    "messages": [
+      { "role": "user", "content": "How can we speed up the Website Redesign project?" },
+      { "role": "assistant", "content": "The Website Redesign project is at 65% progress with an April 20 deadline. Here are optimization suggestions:\n\n1. **Parallelize remaining tasks** - Run QA testing alongside final design revisions\n2. **Increase team allocation** - Consider pulling Sam Patel in for the final sprint\n3. **Scope trimming** - Move the blog redesign to a phase 2 if needed\n4. **Daily standups** - Switch from weekly to daily check-ins for the final 10 days\n\nBased on current velocity, you should hit the deadline with 2 days buffer if you parallelize tasks." }
+    ]
+  },
+  {
+    "id": "ai4", "title": "Invoice Follow-up Email", "createdAt": "2026-04-07T16:00:00", "model": "gravitiq",
+    "messages": [
+      { "role": "user", "content": "Draft a friendly follow-up email for overdue invoices" },
+      { "role": "assistant", "content": "Here is a friendly follow-up template:\n\n**Subject:** Quick reminder - Invoice [NUMBER] due\n\nHi [Client Name],\n\nHope you are doing well! I wanted to send a quick reminder that invoice [NUMBER] for $[AMOUNT] was due on [DATE].\n\nI understand things can get busy, so no worries at all. If there are any questions about the invoice or if you need any adjustments, just let me know.\n\nYou can view and pay the invoice here: [LINK]\n\nThanks so much!\nBest,\nAlvin" }
+    ]
+  },
+  {
+    "id": "ai5", "title": "Competitive Analysis", "createdAt": "2026-04-06T09:00:00", "model": "gravitiq",
+    "messages": [
+      { "role": "user", "content": "What are the key differentiators we should highlight to prospects?" },
+      { "role": "assistant", "content": "Based on your current client feedback and service offering, here are your top differentiators:\n\n1. **AI-Powered Insights** - Real-time analytics that competitors charge extra for\n2. **Speed of Delivery** - Average project completion 30% faster than industry standard\n3. **Full-Stack Capability** - Design, development, and infrastructure under one roof\n4. **Personalized Service** - Small team, direct access to senior talent\n5. **Transparent Pricing** - No hidden fees, milestone-based billing\n\nLead with #1 and #2 for tech-savvy prospects like Daniel Kim from Stellar Systems." }
+    ]
+  },
+  {
+    "id": "ai6", "title": "Team Capacity Planning", "createdAt": "2026-04-05T11:00:00", "model": "gravitiq",
+    "messages": [
+      { "role": "user", "content": "Do we have capacity to take on a new large project next month?" },
+      { "role": "assistant", "content": "Let me analyze your current team allocation:\n\n**Current Load:**\n- Alvin Warren: 3 active projects (high load)\n- Maya Lin: 3 active projects (high load)\n- Jordan Hayes: 3 active projects (high load)\n- Sam Patel: 3 active projects (high load)\n- Lena Kowalski: 2 active projects (moderate load)\n\n**Capacity Forecast for May:**\n- 3 projects in review should complete by mid-April\n- This frees up approximately 40% capacity across the team\n\n**Recommendation:** You can take on a large project starting May 1st, but consider hiring a contractor for the first 2 weeks while review projects wrap up." }
+    ]
+  },
+  {
+    "id": "ai7", "title": "Pricing Strategy Review", "createdAt": "2026-04-03T13:00:00", "model": "gravitiq",
+    "messages": [
+      { "role": "user", "content": "Should we raise our prices for Q2?" },
+      { "role": "assistant", "content": "Based on your current metrics, here is my pricing analysis:\n\n**Current State:**\n- Average project value: $14,500\n- Client satisfaction: High (based on retention and referrals)\n- Market rate for comparable services: $15,000-$22,000\n\n**Recommendation:** Yes, a 10-15% price increase is justified.\n\n**Strategy:**\n1. Grandfather existing active clients at current rates for 6 months\n2. Apply new pricing to all new projects and prospects\n3. Bundle AI features as a premium add-on ($2,000-$3,000)\n4. Introduce a retainer model for ongoing clients at a 10% discount\n\nThis should increase average revenue per client by approximately $2,500/quarter." }
+    ]
+  },
+  {
+    "id": "ai8", "title": "Weekly Status Report", "createdAt": "2026-04-01T08:00:00", "model": "gravitiq",
+    "messages": [
+      { "role": "user", "content": "Generate this week status report for all active projects" },
+      { "role": "assistant", "content": "**Weekly Status Report - April 1, 2026**\n\n**In Progress:**\n- Website Redesign (TechFlow): 65% - On track for April 20 deadline\n- API Integration Suite (BrightPath): 40% - On track\n- Analytics Dashboard (Quantum Dynamics): 55% - On track\n- E-commerce Platform (Luminary): 30% - On track for May 10\n\n**In Review:**\n- Brand Identity Package (Nova Creative): 90% - Client reviewing final assets\n- Cloud Infrastructure (Quantum Dynamics): 85% - Pending security sign-off\n- Content Management System (BrightPath): 95% - Final QA in progress\n\n**Blocked:** None\n**Risks:** None identified\n\n**Highlights:** Completed Security Audit for Quantum Dynamics ahead of schedule. Two new leads in pipeline." }
+    ]
+  }
+]

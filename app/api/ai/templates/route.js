@@ -1,6 +1,6 @@
 // GET /api/ai/templates — List all AI prompt templates
 
-const MOCK_TEMPLATES = [
+const TEMPLATES = [
   {
     id: 'tpl_001',
     title: 'SEO Blog Post',
@@ -91,12 +91,12 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get('category');
 
-  let templates = MOCK_TEMPLATES;
+  let templates = TEMPLATES;
   if (category) {
     templates = templates.filter((t) => t.category === category);
   }
 
-  const categories = [...new Set(MOCK_TEMPLATES.map((t) => t.category))];
+  const categories = [...new Set(TEMPLATES.map((t) => t.category))];
 
   return Response.json({
     success: true,

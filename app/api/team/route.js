@@ -2,66 +2,25 @@
 // POST   /api/team — Invite a new member
 // DELETE /api/team — Remove a member
 
-const MOCK_TEAM = [
-  {
-    id: 'usr_1a2b3c4d',
-    name: 'Alvin Dean',
-    email: 'alvin@nuwavmedia.com',
-    role: 'owner',
-    status: 'active',
-    avatarColor: '#6366F1',
-    joinedAt: '2025-08-12T10:00:00Z',
-    lastActive: '2026-04-10T09:00:00Z',
-  },
-  {
-    id: 'usr_2b3c4d5e',
-    name: 'Jordan Kim',
-    email: 'jordan@nuwavmedia.com',
-    role: 'admin',
-    status: 'active',
-    avatarColor: '#EC4899',
-    joinedAt: '2025-09-01T09:00:00Z',
-    lastActive: '2026-04-10T08:30:00Z',
-  },
-  {
-    id: 'usr_3c4d5e6f',
-    name: 'Maya Torres',
-    email: 'maya@nuwavmedia.com',
-    role: 'member',
-    status: 'active',
-    avatarColor: '#10B981',
-    joinedAt: '2025-10-15T09:00:00Z',
-    lastActive: '2026-04-09T17:45:00Z',
-  },
-  {
-    id: 'usr_4d5e6f7g',
-    name: 'Priya Sundaram',
-    email: 'priya@nuwavmedia.com',
-    role: 'member',
-    status: 'active',
-    avatarColor: '#F59E0B',
-    joinedAt: '2026-01-05T09:00:00Z',
-    lastActive: '2026-04-10T07:15:00Z',
-  },
-  {
-    id: 'usr_5e6f7g8h',
-    name: 'Chris Lawson',
-    email: 'chris@nuwavmedia.com',
-    role: 'member',
-    status: 'invited',
-    avatarColor: '#3B82F6',
-    joinedAt: null,
-    lastActive: null,
-    invitedAt: '2026-04-08T12:00:00Z',
-  },
-];
+import { readCollection, insertOne, deleteOne } from '@/app/lib/db';
 
 export async function GET() {
-  return Response.json({
-    success: true,
-    data: MOCK_TEAM,
-    meta: { total: MOCK_TEAM.length, active: MOCK_TEAM.filter((m) => m.status === 'active').length },
-  });
+  try {
+    const team = await readCollection('team');
+    return Response.json({
+      success: true,
+      data: team,
+      meta: {
+        total: team.length,
+        active: team.filter((m) => m.status === 'active').length,
+      },
+    });
+  } catch {
+    return Response.json(
+      { success: false, error: 'Failed to load team members' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request) {
@@ -91,8 +50,8 @@ export async function POST(request) {
       );
     }
 
-    // Check for duplicate
-    if (MOCK_TEAM.some((m) => m.email === email)) {
+    const team = await readCollection('team');
+    if (team.some((m) => m.email === email)) {
       return Response.json(
         { success: false, error: 'This email is already on the team' },
         { status: 409 }
@@ -100,8 +59,8 @@ export async function POST(request) {
     }
 
     const invitation = {
-      id: `usr_${Date.now().toString(36)}`,
-      name: null,
+      id: 'usr_' + Date.now().toString(36),
+      name: body.name || null,
       email,
       role: role || 'member',
       status: 'invited',
@@ -111,8 +70,10 @@ export async function POST(request) {
       invitedAt: new Date().toISOString(),
     };
 
+    const saved = await insertOne('team', invitation);
+
     return Response.json(
-      { success: true, data: invitation, message: `Invitation sent to ${email}` },
+      { success: true, data: saved, message: `Invitation sent to ${email}` },
       { status: 201 }
     );
   } catch {
@@ -135,7 +96,9 @@ export async function DELETE(request) {
       );
     }
 
-    const member = MOCK_TEAM.find((m) => m.id === memberId);
+    const team = await readCollection('team');
+    const member = team.find((m) => m.id === memberId);
+
     if (!member) {
       return Response.json(
         { success: false, error: 'Team member not found' },
@@ -149,6 +112,8 @@ export async function DELETE(request) {
         { status: 403 }
       );
     }
+
+    await deleteOne('team', memberId);
 
     return Response.json({
       success: true,

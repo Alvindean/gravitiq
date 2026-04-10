@@ -1,32 +1,18 @@
 // GET /api/settings/profile — Return user profile
 // PUT /api/settings/profile — Update profile fields
 
-const MOCK_PROFILE = {
-  id: 'usr_1a2b3c4d',
-  name: 'Alvin Dean',
-  email: 'alvin@nuwavmedia.com',
-  phone: '+1 (555) 012-3456',
-  company: 'NuWav Media',
-  jobTitle: 'CEO & Founder',
-  timezone: 'America/Chicago',
-  language: 'en',
-  avatar: null,
-  bio: 'Building the future of local business marketing with AI-powered tools.',
-  website: 'https://nuwavmedia.com',
-  socialLinks: {
-    linkedin: 'https://linkedin.com/in/alvindean',
-    twitter: 'https://x.com/alvindean',
-    instagram: null,
-  },
-  createdAt: '2025-08-12T10:00:00Z',
-  updatedAt: '2026-04-05T14:30:00Z',
-};
+import { readDocument, writeDocument } from '@/app/lib/db';
 
 export async function GET() {
-  return Response.json({
-    success: true,
-    data: MOCK_PROFILE,
-  });
+  try {
+    const profile = await readDocument('profile');
+    return Response.json({ success: true, data: profile });
+  } catch {
+    return Response.json(
+      { success: false, error: 'Failed to load profile' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function PUT(request) {
@@ -51,18 +37,18 @@ export async function PUT(request) {
       );
     }
 
+    const existing = await readDocument('profile');
     const updated = {
-      ...MOCK_PROFILE,
+      ...existing,
       ...body,
-      id: MOCK_PROFILE.id,
-      createdAt: MOCK_PROFILE.createdAt,
+      id: existing.id,
+      createdAt: existing.createdAt,
       updatedAt: new Date().toISOString(),
     };
 
-    return Response.json({
-      success: true,
-      data: updated,
-    });
+    await writeDocument('profile', updated);
+
+    return Response.json({ success: true, data: updated });
   } catch {
     return Response.json(
       { success: false, error: 'Invalid request body' },

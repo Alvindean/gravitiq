@@ -1,0 +1,8 @@
+[
+  { "id": "task1", "title": "Review homepage mockups with Sarah", "dueDate": "2026-04-11", "priority": "high", "assignee": { "name": "Alvin Warren", "initials": "AW" }, "completed": false },
+  { "id": "task2", "title": "Finalize API documentation for BrightPath", "dueDate": "2026-04-12", "priority": "high", "assignee": { "name": "Jordan Hayes", "initials": "JH" }, "completed": false },
+  { "id": "task3", "title": "Send revised brand guide to Olivia", "dueDate": "2026-04-13", "priority": "medium", "assignee": { "name": "Lena Kowalski", "initials": "LK" }, "completed": false },
+  { "id": "task4", "title": "Set up staging environment for e-commerce", "dueDate": "2026-04-14", "priority": "medium", "assignee": { "name": "Sam Patel", "initials": "SP" }, "completed": false },
+  { "id": "task5", "title": "Schedule demo call with Daniel Kim", "dueDate": "2026-04-11", "priority": "high", "assignee": { "name": "Alvin Warren", "initials": "AW" }, "completed": false },
+  { "id": "task6", "title": "Update team capacity spreadsheet", "dueDate": "2026-04-15", "priority": "low", "assignee": { "name": "Maya Lin", "initials": "ML" }, "completed": true }
+]

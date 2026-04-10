@@ -1,4 +1,7 @@
 // POST /api/auth/login — Authenticate user with email/password
+
+import { readDocument } from '@/app/lib/db';
+
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -11,8 +14,7 @@ export async function POST(request) {
       );
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return Response.json(
         { success: false, error: 'Invalid email format' },
         { status: 400 }
@@ -26,8 +28,10 @@ export async function POST(request) {
       );
     }
 
-    // Mock credential check — accept any well-formed input except this specific combo
-    if (email === 'blocked@example.com') {
+    const profile = await readDocument('profile');
+
+    // Check if email matches the profile (mock auth)
+    if (email !== profile.email) {
       return Response.json(
         { success: false, error: 'Invalid email or password' },
         { status: 401 }
@@ -35,14 +39,14 @@ export async function POST(request) {
     }
 
     const user = {
-      id: 'usr_1a2b3c4d',
-      name: 'Alvin Dean',
-      email,
+      id: profile.id,
+      name: profile.name,
+      email: profile.email,
       role: 'owner',
-      avatar: null,
-      company: 'NuWav Media',
-      plan: 'pro',
-      createdAt: '2025-08-12T10:00:00Z',
+      avatar: profile.avatar || null,
+      company: profile.company,
+      plan: profile.plan || 'pro',
+      createdAt: profile.createdAt,
     };
 
     const token =

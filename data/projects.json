@@ -1,0 +1,140 @@
+[
+  {
+    "id": "p1", "title": "Mobile App Redesign", "clientId": "c1", "clientName": "Sarah Mitchell",
+    "status": "backlog", "priority": "high", "progress": 0, "dueDate": "2026-05-15",
+    "team": [
+      { "name": "Alvin Warren", "initials": "AW", "color": "#4F46E5" },
+      { "name": "Maya Lin", "initials": "ML", "color": "#059669" }
+    ],
+    "description": "Complete redesign of the TechFlow mobile application with new UI/UX patterns.",
+    "createdAt": "2026-04-02"
+  },
+  {
+    "id": "p2", "title": "Data Migration Pipeline", "clientId": "c4", "clientName": "Marcus Thompson",
+    "status": "backlog", "priority": "medium", "progress": 0, "dueDate": "2026-06-01",
+    "team": [
+      { "name": "Jordan Hayes", "initials": "JH", "color": "#DC2626" }
+    ],
+    "description": "Build an automated pipeline to migrate legacy data from Apex Ventures to the new platform.",
+    "createdAt": "2026-04-05"
+  },
+  {
+    "id": "p3", "title": "SEO Optimization Sprint", "clientId": "c5", "clientName": "Olivia Parker",
+    "status": "backlog", "priority": "low", "progress": 0, "dueDate": "2026-05-30",
+    "team": [
+      { "name": "Sam Patel", "initials": "SP", "color": "#EA580C" },
+      { "name": "Maya Lin", "initials": "ML", "color": "#059669" }
+    ],
+    "description": "Comprehensive SEO audit and optimization for Nova Creative marketing pages.",
+    "createdAt": "2026-04-07"
+  },
+  {
+    "id": "p4", "title": "Website Redesign", "clientId": "c1", "clientName": "Sarah Mitchell",
+    "status": "in_progress", "priority": "high", "progress": 65, "dueDate": "2026-04-20",
+    "team": [
+      { "name": "Alvin Warren", "initials": "AW", "color": "#4F46E5" },
+      { "name": "Maya Lin", "initials": "ML", "color": "#059669" },
+      { "name": "Jordan Hayes", "initials": "JH", "color": "#DC2626" }
+    ],
+    "description": "Full website redesign for TechFlow Inc including homepage, product pages, and blog.",
+    "createdAt": "2026-03-10"
+  },
+  {
+    "id": "p5", "title": "API Integration Suite", "clientId": "c2", "clientName": "James Rodriguez",
+    "status": "in_progress", "priority": "high", "progress": 40, "dueDate": "2026-04-28",
+    "team": [
+      { "name": "Jordan Hayes", "initials": "JH", "color": "#DC2626" },
+      { "name": "Sam Patel", "initials": "SP", "color": "#EA580C" }
+    ],
+    "description": "Build REST and GraphQL API integrations for BrightPath Labs platform.",
+    "createdAt": "2026-03-18"
+  },
+  {
+    "id": "p6", "title": "Analytics Dashboard", "clientId": "c3", "clientName": "Emily Chen",
+    "status": "in_progress", "priority": "medium", "progress": 55, "dueDate": "2026-04-25",
+    "team": [
+      { "name": "Alvin Warren", "initials": "AW", "color": "#4F46E5" },
+      { "name": "Lena Kowalski", "initials": "LK", "color": "#7C3AED" }
+    ],
+    "description": "Real-time analytics dashboard for Quantum Dynamics with customizable widgets.",
+    "createdAt": "2026-03-22"
+  },
+  {
+    "id": "p7", "title": "E-commerce Platform", "clientId": "c7", "clientName": "Rachel Foster",
+    "status": "in_progress", "priority": "medium", "progress": 30, "dueDate": "2026-05-10",
+    "team": [
+      { "name": "Maya Lin", "initials": "ML", "color": "#059669" },
+      { "name": "Sam Patel", "initials": "SP", "color": "#EA580C" }
+    ],
+    "description": "Custom e-commerce storefront for Luminary Design with Stripe integration.",
+    "createdAt": "2026-03-28"
+  },
+  {
+    "id": "p8", "title": "Brand Identity Package", "clientId": "c5", "clientName": "Olivia Parker",
+    "status": "review", "priority": "medium", "progress": 90, "dueDate": "2026-04-12",
+    "team": [
+      { "name": "Lena Kowalski", "initials": "LK", "color": "#7C3AED" }
+    ],
+    "description": "Complete brand identity redesign including logo, color palette, and style guide.",
+    "createdAt": "2026-03-01"
+  },
+  {
+    "id": "p9", "title": "Cloud Infrastructure Setup", "clientId": "c3", "clientName": "Emily Chen",
+    "status": "review", "priority": "high", "progress": 85, "dueDate": "2026-04-14",
+    "team": [
+      { "name": "Jordan Hayes", "initials": "JH", "color": "#DC2626" },
+      { "name": "Alvin Warren", "initials": "AW", "color": "#4F46E5" }
+    ],
+    "description": "AWS infrastructure setup with CI/CD pipelines for Quantum Dynamics.",
+    "createdAt": "2026-02-20"
+  },
+  {
+    "id": "p10", "title": "Content Management System", "clientId": "c2", "clientName": "James Rodriguez",
+    "status": "review", "priority": "low", "progress": 95, "dueDate": "2026-04-11",
+    "team": [
+      { "name": "Sam Patel", "initials": "SP", "color": "#EA580C" },
+      { "name": "Maya Lin", "initials": "ML", "color": "#059669" }
+    ],
+    "description": "Headless CMS with custom content types for BrightPath Labs blog and documentation.",
+    "createdAt": "2026-02-15"
+  },
+  {
+    "id": "p11", "title": "Landing Page Campaign", "clientId": "c5", "clientName": "Olivia Parker",
+    "status": "completed", "priority": "high", "progress": 100, "dueDate": "2026-03-30",
+    "team": [
+      { "name": "Lena Kowalski", "initials": "LK", "color": "#7C3AED" },
+      { "name": "Maya Lin", "initials": "ML", "color": "#059669" }
+    ],
+    "description": "High-converting landing pages for Nova Creative spring marketing campaign.",
+    "createdAt": "2026-02-10"
+  },
+  {
+    "id": "p12", "title": "Payment Gateway Integration", "clientId": "c8", "clientName": "Alex Nguyen",
+    "status": "completed", "priority": "medium", "progress": 100, "dueDate": "2026-03-15",
+    "team": [
+      { "name": "Jordan Hayes", "initials": "JH", "color": "#DC2626" }
+    ],
+    "description": "Stripe and PayPal payment gateway integration for Horizon Tech SaaS platform.",
+    "createdAt": "2026-01-20"
+  },
+  {
+    "id": "p13", "title": "User Onboarding Flow", "clientId": "c1", "clientName": "Sarah Mitchell",
+    "status": "completed", "priority": "medium", "progress": 100, "dueDate": "2026-03-20",
+    "team": [
+      { "name": "Alvin Warren", "initials": "AW", "color": "#4F46E5" },
+      { "name": "Sam Patel", "initials": "SP", "color": "#EA580C" }
+    ],
+    "description": "Multi-step onboarding wizard with progress tracking for TechFlow Inc.",
+    "createdAt": "2026-02-01"
+  },
+  {
+    "id": "p14", "title": "Security Audit & Fixes", "clientId": "c3", "clientName": "Emily Chen",
+    "status": "completed", "priority": "high", "progress": 100, "dueDate": "2026-03-25",
+    "team": [
+      { "name": "Jordan Hayes", "initials": "JH", "color": "#DC2626" },
+      { "name": "Alvin Warren", "initials": "AW", "color": "#4F46E5" }
+    ],
+    "description": "Full security audit with vulnerability patches for Quantum Dynamics infrastructure.",
+    "createdAt": "2026-02-05"
+  }
+]

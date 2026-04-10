@@ -1,0 +1,65 @@
+[
+  {
+    "id": "conv1", "clientId": "c1", "clientName": "Sarah Mitchell", "company": "TechFlow Inc",
+    "avatarColor": "#4F46E5", "online": true, "unread": 3,
+    "messages": [
+      { "id": "m1", "sender": "client", "text": "Hi! Just wanted to check in on the website redesign project.", "timestamp": "2026-04-10T10:15:00" },
+      { "id": "m2", "sender": "user", "text": "Hey Sarah! Everything is on track. We finished the homepage mockups yesterday.", "timestamp": "2026-04-10T10:18:00" },
+      { "id": "m3", "sender": "client", "text": "That is amazing! Can you share them with me?", "timestamp": "2026-04-10T10:20:00" },
+      { "id": "m4", "sender": "user", "text": "Of course! I just uploaded them to the shared drive. You should have access now.", "timestamp": "2026-04-10T10:22:00" },
+      { "id": "m5", "sender": "user", "text": "Let me know if you have any feedback or changes you would like to see.", "timestamp": "2026-04-10T10:22:30" },
+      { "id": "m6", "sender": "client", "text": "Sounds great! I will review the mockups tonight.", "timestamp": "2026-04-10T10:25:00" }
+    ]
+  },
+  {
+    "id": "conv2", "clientId": "c2", "clientName": "James Rodriguez", "company": "BrightPath Labs",
+    "avatarColor": "#059669", "online": true, "unread": 1,
+    "messages": [
+      { "id": "m7", "sender": "client", "text": "Quick question about the API rate limits we discussed.", "timestamp": "2026-04-09T14:30:00" },
+      { "id": "m8", "sender": "user", "text": "Sure James, what do you need to know?", "timestamp": "2026-04-09T14:32:00" },
+      { "id": "m9", "sender": "client", "text": "Can we increase the limit to 10,000 requests per minute for the Pro tier?", "timestamp": "2026-04-09T14:35:00" },
+      { "id": "m10", "sender": "user", "text": "Absolutely. I will update the configuration and push the changes today.", "timestamp": "2026-04-09T14:38:00" },
+      { "id": "m11", "sender": "client", "text": "Perfect, thanks!", "timestamp": "2026-04-09T14:40:00" }
+    ]
+  },
+  {
+    "id": "conv3", "clientId": "c3", "clientName": "Emily Chen", "company": "Quantum Dynamics",
+    "avatarColor": "#DC2626", "online": false, "unread": 0,
+    "messages": [
+      { "id": "m12", "sender": "user", "text": "Hi Emily, the analytics dashboard is looking great. Wanted to share a quick update.", "timestamp": "2026-04-08T09:00:00" },
+      { "id": "m13", "sender": "client", "text": "I would love to see it! How is the real-time data feed working?", "timestamp": "2026-04-08T09:15:00" },
+      { "id": "m14", "sender": "user", "text": "Latency is under 200ms. We are streaming via WebSockets with automatic reconnection.", "timestamp": "2026-04-08T09:18:00" },
+      { "id": "m15", "sender": "client", "text": "That exceeds our requirements. Great work!", "timestamp": "2026-04-08T09:25:00" }
+    ]
+  },
+  {
+    "id": "conv4", "clientId": "c5", "clientName": "Olivia Parker", "company": "Nova Creative",
+    "avatarColor": "#EA580C", "online": true, "unread": 2,
+    "messages": [
+      { "id": "m16", "sender": "client", "text": "Hey! The brand identity package looks stunning.", "timestamp": "2026-04-09T16:00:00" },
+      { "id": "m17", "sender": "user", "text": "Glad you love it! Lena really knocked it out of the park with the color palette.", "timestamp": "2026-04-09T16:05:00" },
+      { "id": "m18", "sender": "client", "text": "Could we also get social media templates in the same style?", "timestamp": "2026-04-09T16:10:00" },
+      { "id": "m19", "sender": "user", "text": "Definitely. I will add that to the project scope and send over a revised timeline.", "timestamp": "2026-04-09T16:12:00" },
+      { "id": "m20", "sender": "client", "text": "You guys are the best. Talk soon!", "timestamp": "2026-04-09T16:15:00" },
+      { "id": "m21", "sender": "client", "text": "Oh, one more thing - can we schedule a call for Thursday?", "timestamp": "2026-04-09T16:20:00" }
+    ]
+  },
+  {
+    "id": "conv5", "clientId": "c7", "clientName": "Rachel Foster", "company": "Luminary Design",
+    "avatarColor": "#BE185D", "online": false, "unread": 0,
+    "messages": [
+      { "id": "m22", "sender": "user", "text": "Rachel, the e-commerce storefront prototype is ready for review.", "timestamp": "2026-04-07T11:00:00" },
+      { "id": "m23", "sender": "client", "text": "Awesome! I will check it out this afternoon.", "timestamp": "2026-04-07T11:30:00" },
+      { "id": "m24", "sender": "client", "text": "Just reviewed it. The product pages look incredible. Love the AI recommendations widget.", "timestamp": "2026-04-07T15:45:00" }
+    ]
+  },
+  {
+    "id": "conv6", "clientId": "c6", "clientName": "Daniel Kim", "company": "Stellar Systems",
+    "avatarColor": "#0891B2", "online": true, "unread": 1,
+    "messages": [
+      { "id": "m25", "sender": "client", "text": "Hi there! I saw your demo and I am very impressed.", "timestamp": "2026-04-10T08:00:00" },
+      { "id": "m26", "sender": "user", "text": "Thanks Daniel! Happy to hear that. What features stood out to you?", "timestamp": "2026-04-10T08:10:00" },
+      { "id": "m27", "sender": "client", "text": "The AI-powered analytics and the real-time collaboration tools. Can we schedule a deeper dive?", "timestamp": "2026-04-10T08:15:00" }
+    ]
+  }
+]
