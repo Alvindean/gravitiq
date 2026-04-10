@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { useTheme } from './ThemeProvider';
 
 const navLinks = [
-  { label: 'Features', href: '/features' },
-  { label: 'Pricing', href: '/pricing' },
-  { label: 'Solutions', href: '/solutions' },
-  { label: 'Resources', href: '/resources' },
+  { label: 'Features', href: '/#features' },
+  { label: 'Pricing', href: '/#pricing' },
+  { label: 'Dashboard', href: '/dashboard' },
+  { label: 'AI Assistant', href: '/ai' },
 ];
 
 export default function Navbar() {
@@ -120,7 +120,7 @@ export default function Navbar() {
 
             {/* Sign In (desktop) */}
             <Link
-              href="/sign-in"
+              href="/login"
               className="hidden md:inline-flex rounded-lg px-3 py-2 text-sm font-medium text-muted transition-colors hover:text-foreground hover:bg-muted-light"
             >
               Sign In
@@ -128,7 +128,7 @@ export default function Navbar() {
 
             {/* Get Started CTA (desktop) */}
             <Link
-              href="/get-started"
+              href="/signup"
               className="hidden md:inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
             >
               Get Started
@@ -208,7 +208,7 @@ export default function Navbar() {
           <hr className="my-3" style={{ borderColor: 'var(--border)' }} />
 
           <Link
-            href="/sign-in"
+            href="/login"
             onClick={() => setMobileOpen(false)}
             className="rounded-lg px-3 py-3 text-sm font-medium text-muted transition-colors hover:text-foreground hover:bg-muted-light"
           >
@@ -216,7 +216,7 @@ export default function Navbar() {
           </Link>
 
           <Link
-            href="/get-started"
+            href="/signup"
             onClick={() => setMobileOpen(false)}
             className="mt-1 flex items-center justify-center rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
           >

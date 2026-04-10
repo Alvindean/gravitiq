@@ -226,13 +226,13 @@ export default function Home() {
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/get-started"
+              href="/signup"
               className="inline-flex items-center justify-center rounded-lg bg-primary px-8 py-3.5 text-base font-semibold text-white shadow-lg hover:bg-primary-hover transition-all duration-200"
             >
               Start Free Trial
             </Link>
             <Link
-              href="/demo"
+              href="/dashboard"
               className="inline-flex items-center justify-center rounded-lg border px-8 py-3.5 text-base font-semibold text-foreground hover:bg-muted-light transition-all duration-200"
               style={{ borderColor: 'var(--border)' }}
             >
@@ -454,7 +454,7 @@ export default function Home() {
                   ))}
                 </ul>
                 <Link
-                  href="/get-started"
+                  href="/signup"
                   className={`mt-8 inline-flex items-center justify-center rounded-lg px-6 py-3 text-sm font-semibold transition-all duration-200 ${
                     tier.popular
                       ? "bg-primary text-white shadow-lg hover:bg-primary-hover"
@@ -487,7 +487,7 @@ export default function Home() {
                 Join thousands of teams already using Gravitiq to work smarter.
               </p>
               <Link
-                href="/get-started"
+                href="/signup"
                 className="mt-8 inline-flex items-center justify-center rounded-lg bg-white px-8 py-3.5 text-base font-semibold text-primary shadow-lg hover:bg-white/90 transition-all duration-200"
                 style={{ color: 'var(--primary)' }}
               >
