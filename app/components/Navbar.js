@@ -7,8 +7,8 @@ import { useTheme } from './ThemeProvider';
 const navLinks = [
   { label: 'Features', href: '/#features' },
   { label: 'Pricing', href: '/#pricing' },
+  { label: 'Blog', href: '/blog' },
   { label: 'Dashboard', href: '/dashboard' },
-  { label: 'AI Assistant', href: '/ai' },
 ];
 
 export default function Navbar() {

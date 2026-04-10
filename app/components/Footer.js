@@ -7,7 +7,7 @@ const columns = [
       { label: 'Features', href: '/#features' },
       { label: 'Pricing', href: '/#pricing' },
       { label: 'Dashboard', href: '/dashboard' },
-      { label: 'AI Assistant', href: '/ai' },
+      { label: 'Blog', href: '/blog' },
     ],
   },
   {
