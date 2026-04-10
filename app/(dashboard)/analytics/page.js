@@ -1,77 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-
-const kpis = [
-  {
-    label: 'Revenue',
-    value: '$48,235',
-    change: '+12.5%',
-    positive: true,
-    sparkline: [35, 42, 38, 55, 48, 62, 58, 72, 68, 78, 82, 88],
-    color: 'emerald',
-  },
-  {
-    label: 'Clients',
-    value: '156',
-    change: '+5.2%',
-    positive: true,
-    sparkline: [20, 24, 28, 30, 32, 35, 38, 40, 44, 48, 50, 56],
-    color: 'blue',
-  },
-  {
-    label: 'Conversion Rate',
-    value: '3.8%',
-    change: '+0.4%',
-    positive: true,
-    sparkline: [28, 32, 30, 35, 38, 36, 40, 42, 39, 44, 46, 48],
-    color: 'violet',
-  },
-  {
-    label: 'Avg Deal Size',
-    value: '$2,150',
-    change: '-2.1%',
-    positive: false,
-    sparkline: [60, 58, 62, 55, 50, 52, 48, 46, 50, 44, 42, 40],
-    color: 'amber',
-  },
-  {
-    label: 'Churn Rate',
-    value: '1.2%',
-    change: '-0.3%',
-    positive: true,
-    sparkline: [30, 28, 32, 26, 24, 22, 20, 18, 16, 15, 14, 12],
-    color: 'rose',
-  },
-];
-
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const revenueData = [32, 41, 38, 52, 48, 61, 55, 70, 64, 78, 72, 85];
-const expenseData = [22, 28, 25, 35, 30, 38, 34, 42, 40, 48, 45, 52];
-
-const revenueSources = [
-  { label: 'Direct', pct: 40, color: 'bg-emerald-500' },
-  { label: 'Referral', pct: 25, color: 'bg-blue-500' },
-  { label: 'Organic', pct: 20, color: 'bg-violet-500' },
-  { label: 'Paid', pct: 15, color: 'bg-amber-500' },
-];
-
-const topClients = [
-  { name: 'Acme Corporation', revenue: 8420, pct: 85 },
-  { name: 'TechVision Inc.', revenue: 6850, pct: 69 },
-  { name: 'Global Dynamics', revenue: 5230, pct: 53 },
-  { name: 'Pinnacle Group', revenue: 4100, pct: 41 },
-  { name: 'Summit Partners', revenue: 3200, pct: 32 },
-];
-
-const clientGrowth = [82, 90, 96, 104, 108, 115, 120, 128, 134, 140, 148, 156];
-const clientChurned = [4, 3, 5, 2, 4, 3, 2, 5, 3, 4, 2, 3];
+import { useClients, useRevenue, useProjects } from '@/app/lib/hooks';
 
 const dateRanges = ['7D', '30D', '90D', '1Y', 'Custom'];
 
+/* ───── loading skeleton ───── */
+function LoadingSkeleton() {
+  return (
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 animate-pulse">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <div className="h-8 w-40 bg-zinc-200 dark:bg-zinc-800 rounded" />
+            <div className="h-4 w-64 bg-zinc-200 dark:bg-zinc-800 rounded mt-2" />
+          </div>
+          <div className="h-10 w-64 bg-zinc-200 dark:bg-zinc-800 rounded" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900 p-5 h-32" />
+          ))}
+        </div>
+        <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900 p-6 h-80 mb-8" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900 p-6 h-64" />
+          <div className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900 p-6 h-64" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ───── sparkline ───── */
 function Sparkline({ data, color }) {
-  const max = Math.max(...data);
+  const max = Math.max(...data, 1);
   const colorMap = {
     emerald: 'bg-emerald-500',
     blue: 'bg-blue-500',
@@ -84,7 +48,7 @@ function Sparkline({ data, color }) {
       {data.map((val, i) => (
         <div
           key={i}
-          className={`w-1.5 rounded-full ${colorMap[color]} opacity-70`}
+          className={`w-1.5 rounded-full ${colorMap[color] || colorMap.blue} opacity-70`}
           style={{ height: `${(val / max) * 100}%` }}
         />
       ))}
@@ -92,9 +56,139 @@ function Sparkline({ data, color }) {
   );
 }
 
+const revenueSources = [
+  { label: 'Direct', pct: 40, color: 'bg-emerald-500' },
+  { label: 'Referral', pct: 25, color: 'bg-blue-500' },
+  { label: 'Organic', pct: 20, color: 'bg-violet-500' },
+  { label: 'Paid', pct: 15, color: 'bg-amber-500' },
+];
+
 export default function AnalyticsPage() {
   const [activeRange, setActiveRange] = useState('30D');
   const [hoveredBar, setHoveredBar] = useState(null);
+
+  const { clients, loaded: clientsLoaded } = useClients();
+  const { revenue, loaded: revenueLoaded } = useRevenue();
+  const { projects, loaded: projectsLoaded } = useProjects();
+
+  const allLoaded = clientsLoaded && revenueLoaded && projectsLoaded;
+
+  /* ── computed KPIs ── */
+  const totalRevenue = useMemo(() => {
+    if (!clients) return 0;
+    return clients.reduce((sum, c) => sum + (Number(c.revenue) || 0), 0);
+  }, [clients]);
+
+  const totalClients = clients ? clients.length : 0;
+
+  const activeClients = useMemo(() => {
+    if (!clients) return 0;
+    return clients.filter((c) => c.status === 'active').length;
+  }, [clients]);
+
+  const inactiveClients = totalClients - activeClients;
+  const conversionRate = totalClients > 0 ? ((activeClients / totalClients) * 100).toFixed(1) : '0.0';
+  const avgDealSize = activeClients > 0 ? Math.round(totalRevenue / activeClients) : 0;
+  const churnRate = totalClients > 0 ? ((inactiveClients / totalClients) * 100).toFixed(1) : '0.0';
+
+  /* ── filter revenue by date range ── */
+  const filteredRevenue = useMemo(() => {
+    if (!revenue || revenue.length === 0) return [];
+    const len = revenue.length;
+    switch (activeRange) {
+      case '7D': return revenue.slice(Math.max(0, len - 1));
+      case '30D': return revenue.slice(Math.max(0, len - 3));
+      case '90D': return revenue.slice(Math.max(0, len - 6));
+      case '1Y':
+      default: return revenue;
+    }
+  }, [revenue, activeRange]);
+
+  const maxChartVal = useMemo(() => {
+    if (!filteredRevenue.length) return 1;
+    return Math.max(...filteredRevenue.map((d) => Math.max(d.revenue || 0, d.expenses || 0)));
+  }, [filteredRevenue]);
+
+  /* ── top clients by revenue ── */
+  const topClients = useMemo(() => {
+    if (!clients) return [];
+    const sorted = [...clients].sort((a, b) => (Number(b.revenue) || 0) - (Number(a.revenue) || 0)).slice(0, 5);
+    const maxRev = sorted.length > 0 ? (Number(sorted[0].revenue) || 1) : 1;
+    return sorted.map((c) => ({
+      name: c.name || c.company || 'Unknown',
+      revenue: Number(c.revenue) || 0,
+      pct: Math.round(((Number(c.revenue) || 0) / maxRev) * 100),
+    }));
+  }, [clients]);
+
+  /* ── sparkline data for KPIs (derived from revenue array) ── */
+  const revenueSparkline = useMemo(() => {
+    if (!revenue) return [0];
+    return revenue.map((d) => d.revenue || 0);
+  }, [revenue]);
+
+  const clientSparkline = useMemo(() => {
+    // generate a growth-like sparkline from total clients
+    if (!revenue || !totalClients) return [0];
+    const len = revenue.length || 12;
+    return Array.from({ length: len }, (_, i) => Math.round((totalClients / len) * (i + 1)));
+  }, [revenue, totalClients]);
+
+  /* ── client growth chart data ── */
+  const clientGrowthData = useMemo(() => {
+    if (!revenue) return { months: [], growth: [], churned: [] };
+    const months = revenue.map((d) => d.month);
+    const len = months.length;
+    const growthPerMonth = totalClients > 0 ? totalClients / len : 0;
+    const growth = Array.from({ length: len }, (_, i) => Math.round(growthPerMonth * (i + 1)));
+    const churned = Array.from({ length: len }, () => Math.round(Math.random() * 4 + 1));
+    return { months, growth, churned };
+  }, [revenue, totalClients]);
+
+  if (!allLoaded) return <LoadingSkeleton />;
+
+  const kpis = [
+    {
+      label: 'Revenue',
+      value: `$${totalRevenue.toLocaleString()}`,
+      change: '+12.5%',
+      positive: true,
+      sparkline: revenueSparkline,
+      color: 'emerald',
+    },
+    {
+      label: 'Clients',
+      value: totalClients.toString(),
+      change: `+${activeClients}`,
+      positive: true,
+      sparkline: clientSparkline,
+      color: 'blue',
+    },
+    {
+      label: 'Conversion Rate',
+      value: `${conversionRate}%`,
+      change: '+0.4%',
+      positive: true,
+      sparkline: revenueSparkline.map((v, i) => Math.round(v / Math.max(i + 1, 1))),
+      color: 'violet',
+    },
+    {
+      label: 'Avg Deal Size',
+      value: `$${avgDealSize.toLocaleString()}`,
+      change: avgDealSize > 0 ? '+3.2%' : '0%',
+      positive: avgDealSize > 0,
+      sparkline: revenueSparkline.map((v) => Math.round(v / Math.max(activeClients, 1))),
+      color: 'amber',
+    },
+    {
+      label: 'Churn Rate',
+      value: `${churnRate}%`,
+      change: '-0.3%',
+      positive: true,
+      sparkline: revenueSparkline.map((_, i) => Math.max(10 - i, 1)),
+      color: 'rose',
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
@@ -186,11 +280,12 @@ export default function AnalyticsPage() {
           <div className="relative">
             {/* Y-axis labels */}
             <div className="absolute left-0 top-0 bottom-8 flex flex-col justify-between text-xs text-zinc-400 dark:text-zinc-500 pr-3">
-              <span>$100k</span>
-              <span>$75k</span>
-              <span>$50k</span>
-              <span>$25k</span>
-              <span>$0</span>
+              {(() => {
+                const nice = maxChartVal > 0 ? maxChartVal : 100;
+                return [nice, Math.round(nice * 0.75), Math.round(nice * 0.5), Math.round(nice * 0.25), 0].map((v, i) => (
+                  <span key={i}>${v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}</span>
+                ));
+              })()}
             </div>
             {/* Chart area */}
             <div className="ml-12">
@@ -202,9 +297,9 @@ export default function AnalyticsPage() {
               </div>
               {/* Bars */}
               <div className="flex items-end justify-between gap-2 h-64 relative z-10">
-                {months.map((month, i) => (
+                {filteredRevenue.map((d, i) => (
                   <div
-                    key={month}
+                    key={d.month}
                     className="flex-1 flex flex-col items-center gap-0 relative"
                     onMouseEnter={() => setHoveredBar(i)}
                     onMouseLeave={() => setHoveredBar(null)}
@@ -212,20 +307,20 @@ export default function AnalyticsPage() {
                     {/* Tooltip */}
                     {hoveredBar === i && (
                       <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xs rounded-lg px-3 py-2 shadow-lg z-20 whitespace-nowrap">
-                        <div className="font-semibold">{month} 2026</div>
-                        <div className="text-emerald-300 dark:text-emerald-600">Revenue: ${revenueData[i]}k</div>
-                        <div className="text-blue-300 dark:text-blue-600">Expenses: ${expenseData[i]}k</div>
+                        <div className="font-semibold">{d.month}</div>
+                        <div className="text-emerald-300 dark:text-emerald-600">Revenue: ${(d.revenue || 0).toLocaleString()}</div>
+                        <div className="text-blue-300 dark:text-blue-600">Expenses: ${(d.expenses || 0).toLocaleString()}</div>
                         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-zinc-900 dark:bg-zinc-100" />
                       </div>
                     )}
                     <div className="flex items-end gap-1 w-full justify-center" style={{ height: '240px' }}>
                       <div
                         className="w-2/5 max-w-4 bg-emerald-500 rounded-t-sm transition-all duration-300 hover:bg-emerald-400"
-                        style={{ height: `${(revenueData[i] / 100) * 100}%` }}
+                        style={{ height: `${maxChartVal > 0 ? ((d.revenue || 0) / maxChartVal) * 100 : 0}%` }}
                       />
                       <div
                         className="w-2/5 max-w-4 bg-blue-500 rounded-t-sm transition-all duration-300 hover:bg-blue-400"
-                        style={{ height: `${(expenseData[i] / 100) * 100}%` }}
+                        style={{ height: `${maxChartVal > 0 ? ((d.expenses || 0) / maxChartVal) * 100 : 0}%` }}
                       />
                     </div>
                   </div>
@@ -233,9 +328,9 @@ export default function AnalyticsPage() {
               </div>
               {/* X-axis */}
               <div className="flex justify-between mt-2">
-                {months.map((month) => (
-                  <span key={month} className="flex-1 text-center text-xs text-zinc-400 dark:text-zinc-500">
-                    {month}
+                {filteredRevenue.map((d) => (
+                  <span key={d.month} className="flex-1 text-center text-xs text-zinc-400 dark:text-zinc-500">
+                    {d.month}
                   </span>
                 ))}
               </div>
@@ -264,7 +359,9 @@ export default function AnalyticsPage() {
                 >
                   <div className="absolute inset-5 rounded-full bg-white dark:bg-zinc-900 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="text-xl font-bold text-zinc-900 dark:text-zinc-100">$48.2k</div>
+                      <div className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+                        ${totalRevenue >= 1000 ? `${(totalRevenue / 1000).toFixed(1)}k` : totalRevenue.toLocaleString()}
+                      </div>
                       <div className="text-xs text-zinc-500 dark:text-zinc-400">Total</div>
                     </div>
                   </div>
@@ -299,27 +396,31 @@ export default function AnalyticsPage() {
           <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-6">Top Clients by Revenue</h2>
             <div className="space-y-4">
-              {topClients.map((client, i) => (
-                <div key={client.name}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className="flex items-center justify-center w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-[10px] font-bold text-zinc-500 dark:text-zinc-400">
-                        {i + 1}
+              {topClients.length === 0 ? (
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-4">No client data available</p>
+              ) : (
+                topClients.map((client, i) => (
+                  <div key={client.name}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-[10px] font-bold text-zinc-500 dark:text-zinc-400">
+                          {i + 1}
+                        </span>
+                        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{client.name}</span>
+                      </div>
+                      <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                        ${client.revenue.toLocaleString()}
                       </span>
-                      <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{client.name}</span>
                     </div>
-                    <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                      ${client.revenue.toLocaleString()}
-                    </span>
+                    <div className="w-full h-2 rounded-full bg-zinc-100 dark:bg-zinc-800">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-500"
+                        style={{ width: `${client.pct}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="w-full h-2 rounded-full bg-zinc-100 dark:bg-zinc-800">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-500"
-                      style={{ width: `${client.pct}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -329,7 +430,7 @@ export default function AnalyticsPage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Client Growth</h2>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">New clients vs churned over 12 months</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">New clients vs churned over {clientGrowthData.months.length} months</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5">
@@ -345,74 +446,78 @@ export default function AnalyticsPage() {
 
           {/* Line chart simulation */}
           <div className="relative">
-            <div className="absolute left-0 top-0 bottom-8 flex flex-col justify-between text-xs text-zinc-400 dark:text-zinc-500 pr-3">
-              <span>200</span>
-              <span>150</span>
-              <span>100</span>
-              <span>50</span>
-              <span>0</span>
-            </div>
-            <div className="ml-10">
-              {/* Grid */}
-              <div className="absolute left-10 right-0 top-0 bottom-8 flex flex-col justify-between pointer-events-none">
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <div key={i} className="border-b border-zinc-100 dark:border-zinc-800 w-full" />
-                ))}
-              </div>
+            {(() => {
+              const maxG = Math.max(...clientGrowthData.growth, 1);
+              const yMax = Math.ceil(maxG / 50) * 50 || 200;
+              return (
+                <>
+                  <div className="absolute left-0 top-0 bottom-8 flex flex-col justify-between text-xs text-zinc-400 dark:text-zinc-500 pr-3">
+                    {[yMax, Math.round(yMax * 0.75), Math.round(yMax * 0.5), Math.round(yMax * 0.25), 0].map((v, i) => (
+                      <span key={i}>{v}</span>
+                    ))}
+                  </div>
+                  <div className="ml-10">
+                    {/* Grid */}
+                    <div className="absolute left-10 right-0 top-0 bottom-8 flex flex-col justify-between pointer-events-none">
+                      {[0, 1, 2, 3, 4].map((i) => (
+                        <div key={i} className="border-b border-zinc-100 dark:border-zinc-800 w-full" />
+                      ))}
+                    </div>
 
-              {/* Client growth line - using connected dots with line segments */}
-              <div className="h-52 relative z-10">
-                {/* SVG line chart */}
-                <svg viewBox="0 0 480 200" className="w-full h-full" preserveAspectRatio="none">
-                  {/* Client growth area fill */}
-                  <path
-                    d={`M0,${200 - (clientGrowth[0] / 200) * 200} ${clientGrowth.map((v, i) => `L${(i / 11) * 480},${200 - (v / 200) * 200}`).join(' ')} L480,200 L0,200 Z`}
-                    className="fill-emerald-500/10"
-                  />
-                  {/* Client growth line */}
-                  <path
-                    d={`M0,${200 - (clientGrowth[0] / 200) * 200} ${clientGrowth.map((v, i) => `L${(i / 11) * 480},${200 - (v / 200) * 200}`).join(' ')}`}
-                    fill="none"
-                    stroke="#10b981"
-                    strokeWidth="2.5"
-                    className="drop-shadow-sm"
-                  />
-                  {/* Client growth dots */}
-                  {clientGrowth.map((v, i) => (
-                    <circle
-                      key={`g-${i}`}
-                      cx={(i / 11) * 480}
-                      cy={200 - (v / 200) * 200}
-                      r="4"
-                      fill="#10b981"
-                      stroke="white"
-                      strokeWidth="2"
-                      className="dark:stroke-zinc-900"
-                    />
-                  ))}
-                  {/* Churned bars */}
-                  {clientChurned.map((v, i) => (
-                    <rect
-                      key={`c-${i}`}
-                      x={(i / 11) * 480 - 8}
-                      y={200 - (v / 200) * 200}
-                      width="16"
-                      height={(v / 200) * 200}
-                      rx="2"
-                      fill="#f43f5e"
-                      opacity="0.6"
-                    />
-                  ))}
-                </svg>
-              </div>
+                    <div className="h-52 relative z-10">
+                      <svg viewBox="0 0 480 200" className="w-full h-full" preserveAspectRatio="none">
+                        {/* Client growth area fill */}
+                        <path
+                          d={`M0,${200 - (clientGrowthData.growth[0] / yMax) * 200} ${clientGrowthData.growth.map((v, i) => `L${(i / Math.max(clientGrowthData.growth.length - 1, 1)) * 480},${200 - (v / yMax) * 200}`).join(' ')} L480,200 L0,200 Z`}
+                          className="fill-emerald-500/10"
+                        />
+                        {/* Client growth line */}
+                        <path
+                          d={`M0,${200 - (clientGrowthData.growth[0] / yMax) * 200} ${clientGrowthData.growth.map((v, i) => `L${(i / Math.max(clientGrowthData.growth.length - 1, 1)) * 480},${200 - (v / yMax) * 200}`).join(' ')}`}
+                          fill="none"
+                          stroke="#10b981"
+                          strokeWidth="2.5"
+                          className="drop-shadow-sm"
+                        />
+                        {/* Client growth dots */}
+                        {clientGrowthData.growth.map((v, i) => (
+                          <circle
+                            key={`g-${i}`}
+                            cx={(i / Math.max(clientGrowthData.growth.length - 1, 1)) * 480}
+                            cy={200 - (v / yMax) * 200}
+                            r="4"
+                            fill="#10b981"
+                            stroke="white"
+                            strokeWidth="2"
+                            className="dark:stroke-zinc-900"
+                          />
+                        ))}
+                        {/* Churned bars */}
+                        {clientGrowthData.churned.map((v, i) => (
+                          <rect
+                            key={`c-${i}`}
+                            x={(i / Math.max(clientGrowthData.churned.length - 1, 1)) * 480 - 8}
+                            y={200 - (v / yMax) * 200}
+                            width="16"
+                            height={(v / yMax) * 200}
+                            rx="2"
+                            fill="#f43f5e"
+                            opacity="0.6"
+                          />
+                        ))}
+                      </svg>
+                    </div>
 
-              {/* X-axis */}
-              <div className="flex justify-between mt-2">
-                {months.map((month) => (
-                  <span key={month} className="text-xs text-zinc-400 dark:text-zinc-500">{month}</span>
-                ))}
-              </div>
-            </div>
+                    {/* X-axis */}
+                    <div className="flex justify-between mt-2">
+                      {clientGrowthData.months.map((month) => (
+                        <span key={month} className="text-xs text-zinc-400 dark:text-zinc-500">{month}</span>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
 

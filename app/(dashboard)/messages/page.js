@@ -1,111 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-
-const conversations = [
-  {
-    id: 1,
-    name: 'Sarah Mitchell',
-    company: 'TechFlow Inc',
-    color: '#4f46e5',
-    lastMessage: 'Sounds great! I will review the mockups tonight.',
-    time: '2m ago',
-    unread: 2,
-    online: true,
-    messages: [
-      { id: 1, sender: 'them', text: 'Hi! Just wanted to check in on the website redesign project.', time: '10:15 AM' },
-      { id: 2, sender: 'me', text: 'Hey Sarah! Everything is on track. We finished the homepage mockups yesterday.', time: '10:18 AM' },
-      { id: 3, sender: 'them', text: 'That is amazing! Can you share them with me?', time: '10:20 AM' },
-      { id: 4, sender: 'me', text: 'Of course! I just uploaded them to the shared drive. You should have access now.', time: '10:22 AM' },
-      { id: 5, sender: 'me', text: 'Let me know if you have any feedback or changes you would like to see.', time: '10:22 AM' },
-      { id: 6, sender: 'them', text: 'Sounds great! I will review the mockups tonight.', time: '10:25 AM' },
-    ],
-  },
-  {
-    id: 2,
-    name: 'James Rodriguez',
-    company: 'BrightPath Labs',
-    color: '#06b6d4',
-    lastMessage: 'Can we schedule a call for tomorrow?',
-    time: '1h ago',
-    unread: 0,
-    online: true,
-    messages: [
-      { id: 1, sender: 'them', text: 'Hey, I have some updates on the payment integration requirements.', time: '9:00 AM' },
-      { id: 2, sender: 'me', text: 'Sure, I would love to hear about them. What has changed?', time: '9:05 AM' },
-      { id: 3, sender: 'them', text: 'We need to add support for recurring subscriptions. Can we schedule a call for tomorrow?', time: '9:10 AM' },
-    ],
-  },
-  {
-    id: 3,
-    name: 'Emily Chen',
-    company: 'Quantum Dynamics',
-    color: '#8b5cf6',
-    lastMessage: 'The brand package looks incredible!',
-    time: '3h ago',
-    unread: 1,
-    online: false,
-    messages: [
-      { id: 1, sender: 'me', text: 'Hi Emily, the brand identity package is ready for your review.', time: '7:30 AM' },
-      { id: 2, sender: 'them', text: 'The brand package looks incredible!', time: '7:45 AM' },
-    ],
-  },
-  {
-    id: 4,
-    name: 'Olivia Parker',
-    company: 'Nova Creative',
-    color: '#ec4899',
-    lastMessage: 'Perfect, see you at the presentation!',
-    time: '5h ago',
-    unread: 0,
-    online: false,
-    messages: [
-      { id: 1, sender: 'them', text: 'Quick question about the mobile app timeline.', time: 'Yesterday' },
-      { id: 2, sender: 'me', text: 'We are aiming for a beta release by May 10th. The core features are about 40% complete.', time: 'Yesterday' },
-      { id: 3, sender: 'them', text: 'That works for us. Can we do a demo next week?', time: 'Yesterday' },
-      { id: 4, sender: 'me', text: 'Absolutely! How about Wednesday at 2 PM?', time: 'Yesterday' },
-      { id: 5, sender: 'them', text: 'Perfect, see you at the presentation!', time: 'Yesterday' },
-    ],
-  },
-  {
-    id: 5,
-    name: 'Daniel Kim',
-    company: 'Stellar Systems',
-    color: '#10b981',
-    lastMessage: 'I will send over the requirements doc shortly.',
-    time: '1d ago',
-    unread: 0,
-    online: false,
-    messages: [
-      { id: 1, sender: 'me', text: 'Welcome aboard Daniel! Excited to work with Stellar Systems.', time: 'Apr 8' },
-      { id: 2, sender: 'them', text: 'Thanks! We are excited too. We have a big project in mind.', time: 'Apr 8' },
-      { id: 3, sender: 'me', text: 'Great to hear! Feel free to share any initial docs or briefs you have.', time: 'Apr 8' },
-      { id: 4, sender: 'them', text: 'I will send over the requirements doc shortly.', time: 'Apr 8' },
-    ],
-  },
-  {
-    id: 6,
-    name: 'Rachel Foster',
-    company: 'Luminary Design',
-    color: '#f97316',
-    lastMessage: 'The SEO results are looking promising!',
-    time: '2d ago',
-    unread: 0,
-    online: false,
-    messages: [
-      { id: 1, sender: 'them', text: 'Just saw the latest analytics report. Great improvements!', time: 'Apr 7' },
-      { id: 2, sender: 'me', text: 'Thanks Rachel! The organic traffic is up 32% this month.', time: 'Apr 7' },
-      { id: 3, sender: 'them', text: 'The SEO results are looking promising!', time: 'Apr 7' },
-    ],
-  },
-];
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useConversations } from '@/app/lib/hooks';
 
 function Avatar({ name, color, size = 'md', online }) {
-  const initials = name.split(' ').map(n => n[0]).join('');
+  const initials = (name || '').split(' ').map(n => n[0]).join('');
   const sizes = { sm: 'w-8 h-8 text-xs', md: 'w-10 h-10 text-sm', lg: 'w-12 h-12 text-base' };
   return (
     <div className="relative shrink-0">
-      <div className={`${sizes[size]} rounded-full flex items-center justify-center text-white font-semibold`} style={{ backgroundColor: color }}>
+      <div className={`${sizes[size]} rounded-full flex items-center justify-center text-white font-semibold`} style={{ backgroundColor: color || '#6366f1' }}>
         {initials}
       </div>
       {online !== undefined && (
@@ -115,29 +18,147 @@ function Avatar({ name, color, size = 'md', online }) {
   );
 }
 
+function formatMessageTime(timestamp) {
+  if (!timestamp) return '';
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function formatChatTime(timestamp) {
+  if (!timestamp) return '';
+  const date = new Date(timestamp);
+  return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="h-8 w-32 bg-surface-elevated rounded animate-pulse mb-6" />
+        <div className="bg-surface border border-border rounded-xl overflow-hidden flex" style={{ height: 'calc(100vh - 180px)', minHeight: '500px' }}>
+          <div className="w-80 border-r border-border flex flex-col">
+            <div className="p-4 border-b border-border">
+              <div className="h-10 bg-surface-elevated rounded-lg animate-pulse" />
+            </div>
+            <div className="flex-1 p-2 space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-start gap-3 px-4 py-3 animate-pulse">
+                  <div className="w-10 h-10 rounded-full bg-surface-elevated" />
+                  <div className="flex-1">
+                    <div className="h-4 w-24 bg-surface-elevated rounded mb-2" />
+                    <div className="h-3 w-32 bg-surface-elevated rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="h-8 w-48 bg-surface-elevated rounded animate-pulse" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const mockReplies = [
+  "Thanks for the update! I'll review that shortly.",
+  "Sounds great, let me get back to you on that.",
+  "Perfect, that works for me!",
+  "I appreciate you letting me know. We'll discuss further.",
+  "Got it! I'll take a look and follow up tomorrow.",
+  "That's exactly what I was thinking. Let's move forward.",
+  "Wonderful, thanks for the quick turnaround!",
+  "Let me check with the team and circle back.",
+];
+
 export default function MessagesPage() {
-  const [selectedId, setSelectedId] = useState(conversations[0].id);
+  const { conversations, addMessage, loaded } = useConversations();
+  const [selectedId, setSelectedId] = useState(null);
   const [messageInput, setMessageInput] = useState('');
   const [search, setSearch] = useState('');
   const [mobileShowChat, setMobileShowChat] = useState(false);
-  const [localConversations, setLocalConversations] = useState(conversations);
+  const [localUnread, setLocalUnread] = useState({});
+  const messagesEndRef = useRef(null);
+  const initializedUnread = useRef(false);
 
-  const selected = localConversations.find(c => c.id === selectedId);
+  // Initialize unread counts from conversation data
+  useEffect(() => {
+    if (loaded && conversations && !initializedUnread.current) {
+      const unreadMap = {};
+      conversations.forEach(c => {
+        if (c.unread && c.unread > 0) {
+          unreadMap[c.id] = c.unread;
+        }
+      });
+      setLocalUnread(unreadMap);
+      initializedUnread.current = true;
+    }
+  }, [loaded, conversations]);
 
-  const filteredConversations = localConversations.filter(c =>
-    c.name.toLowerCase().includes(search.toLowerCase()) || c.company.toLowerCase().includes(search.toLowerCase())
+  // Auto-select first conversation
+  useEffect(() => {
+    if (loaded && conversations && conversations.length > 0 && !selectedId) {
+      setSelectedId(conversations[0].id);
+    }
+  }, [loaded, conversations, selectedId]);
+
+  // Scroll to bottom on new messages
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [conversations, selectedId]);
+
+  const selected = (conversations || []).find(c => c.id === selectedId);
+
+  const filteredConversations = (conversations || []).filter(c =>
+    (c.name || '').toLowerCase().includes(search.toLowerCase()) ||
+    (c.company || '').toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleSend = () => {
-    if (!messageInput.trim()) return;
-    const newMsg = { id: Date.now(), sender: 'me', text: messageInput, time: 'Just now' };
-    setLocalConversations(prev => prev.map(c =>
-      c.id === selectedId
-        ? { ...c, messages: [...c.messages, newMsg], lastMessage: messageInput, time: 'Just now' }
-        : c
-    ));
-    setMessageInput('');
+  const getLastMessage = (convo) => {
+    if (convo.lastMessage) return convo.lastMessage;
+    if (convo.messages && convo.messages.length > 0) {
+      return convo.messages[convo.messages.length - 1].text;
+    }
+    return '';
   };
+
+  const getLastTime = (convo) => {
+    if (convo.messages && convo.messages.length > 0) {
+      const lastMsg = convo.messages[convo.messages.length - 1];
+      if (lastMsg.timestamp) return formatMessageTime(lastMsg.timestamp);
+      if (lastMsg.time) return lastMsg.time;
+    }
+    if (convo.time) return convo.time;
+    return '';
+  };
+
+  const handleSend = useCallback(() => {
+    if (!messageInput.trim() || !selectedId) return;
+    const text = messageInput.trim();
+    setMessageInput('');
+
+    // Send user message
+    addMessage(selectedId, text, 'user');
+
+    // Auto-generate mock reply after 1 second
+    setTimeout(() => {
+      const reply = mockReplies[Math.floor(Math.random() * mockReplies.length)];
+      addMessage(selectedId, reply, 'client');
+    }, 1000);
+  }, [messageInput, selectedId, addMessage]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -149,8 +170,15 @@ export default function MessagesPage() {
   const selectConversation = (id) => {
     setSelectedId(id);
     setMobileShowChat(true);
-    setLocalConversations(prev => prev.map(c => c.id === id ? { ...c, unread: 0 } : c));
+    // Clear unread for this conversation
+    setLocalUnread(prev => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
   };
+
+  if (!loaded) return <LoadingSkeleton />;
 
   return (
     <div className="min-h-screen bg-background">
@@ -176,6 +204,9 @@ export default function MessagesPage() {
 
             {/* Conversation list */}
             <div className="flex-1 overflow-y-auto">
+              {filteredConversations.length === 0 && (
+                <div className="p-4 text-center text-sm text-muted">No conversations found</div>
+              )}
               {filteredConversations.map(convo => (
                 <button
                   key={convo.id}
@@ -188,14 +219,14 @@ export default function MessagesPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <p className="font-medium text-foreground text-sm truncate">{convo.name}</p>
-                      <span className="text-[11px] text-muted shrink-0 ml-2">{convo.time}</span>
+                      <span className="text-[11px] text-muted shrink-0 ml-2">{getLastTime(convo)}</span>
                     </div>
                     <p className="text-xs text-muted truncate mt-0.5">{convo.company}</p>
-                    <p className="text-xs text-muted truncate mt-1">{convo.lastMessage}</p>
+                    <p className="text-xs text-muted truncate mt-1">{getLastMessage(convo)}</p>
                   </div>
-                  {convo.unread > 0 && (
+                  {(localUnread[convo.id] || 0) > 0 && (
                     <span className="shrink-0 w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center mt-1">
-                      {convo.unread}
+                      {localUnread[convo.id]}
                     </span>
                   )}
                 </button>
@@ -232,20 +263,26 @@ export default function MessagesPage() {
 
                 {/* Messages area */}
                 <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-                  {selected.messages.map(msg => (
-                    <div key={msg.id} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[75%] ${msg.sender === 'me' ? 'order-1' : 'order-1'}`}>
-                        <div className={`px-4 py-2.5 rounded-2xl text-sm ${
-                          msg.sender === 'me'
-                            ? 'bg-primary text-white rounded-br-md'
-                            : 'bg-surface-elevated text-foreground rounded-bl-md'
-                        }`}>
-                          {msg.text}
+                  {(selected.messages || []).map((msg, idx) => {
+                    const isMe = msg.sender === 'me' || msg.sender === 'user';
+                    return (
+                      <div key={msg.id || idx} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                        <div className="max-w-[75%]">
+                          <div className={`px-4 py-2.5 rounded-2xl text-sm ${
+                            isMe
+                              ? 'bg-primary text-white rounded-br-md'
+                              : 'bg-surface-elevated text-foreground rounded-bl-md'
+                          }`}>
+                            {msg.text}
+                          </div>
+                          <p className={`text-[10px] text-muted mt-1 ${isMe ? 'text-right' : 'text-left'}`}>
+                            {msg.timestamp ? formatChatTime(msg.timestamp) : msg.time || ''}
+                          </p>
                         </div>
-                        <p className={`text-[10px] text-muted mt-1 ${msg.sender === 'me' ? 'text-right' : 'text-left'}`}>{msg.time}</p>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
+                  <div ref={messagesEndRef} />
                 </div>
 
                 {/* Message input */}

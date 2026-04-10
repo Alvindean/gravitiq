@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 const categories = ['All', 'Sales', 'Marketing', 'Reports', 'Client Communication', 'Internal'];
@@ -163,6 +164,7 @@ const categoryColors = {
 export default function AITemplatesPage() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [search, setSearch] = useState('');
+  const router = useRouter();
 
   const filtered = templates.filter((t) => {
     const matchesCategory = activeCategory === 'All' || t.category === activeCategory;
@@ -172,6 +174,10 @@ export default function AITemplatesPage() {
       t.description.toLowerCase().includes(search.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  const handleUseTemplate = (template) => {
+    router.push(`/ai?template=${template.id}`);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -251,15 +257,15 @@ export default function AITemplatesPage() {
               </div>
               <h3 className="text-base font-semibold text-foreground mb-1.5">{template.title}</h3>
               <p className="text-sm text-muted mb-4 leading-relaxed">{template.description}</p>
-              <Link
-                href={`/ai?template=${template.id}`}
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-hover transition-colors"
+              <button
+                onClick={() => handleUseTemplate(template)}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-hover transition-colors cursor-pointer"
               >
                 Use Template
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                 </svg>
-              </Link>
+              </button>
             </div>
           ))}
         </div>

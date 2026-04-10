@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useProfile, useNotifications } from '@/app/lib/hooks';
 
 const tabs = ['Profile', 'Notifications', 'Security', 'Integrations'];
 
@@ -10,37 +11,91 @@ const timezones = [
   'Australia/Sydney', 'Pacific/Auckland',
 ];
 
-const emailNotifications = [
-  { key: 'newClient', label: 'New client', desc: 'Get notified when a new client is added to your workspace' },
-  { key: 'invoicePaid', label: 'Invoice paid', desc: 'Receive alerts when clients pay their invoices' },
-  { key: 'projectUpdate', label: 'Project update', desc: 'Stay informed about project milestones and changes' },
-  { key: 'aiTaskComplete', label: 'AI task complete', desc: 'Know when AI-powered tasks finish processing' },
-  { key: 'weeklyDigest', label: 'Weekly digest', desc: 'A weekly summary of your workspace activity' },
+const emailNotificationsMeta = [
+  { key: 'emailNewClient', label: 'New client', desc: 'Get notified when a new client is added to your workspace' },
+  { key: 'emailInvoicePaid', label: 'Invoice paid', desc: 'Receive alerts when clients pay their invoices' },
+  { key: 'emailProjectUpdate', label: 'Project update', desc: 'Stay informed about project milestones and changes' },
+  { key: 'emailAiComplete', label: 'AI task complete', desc: 'Know when AI-powered tasks finish processing' },
+  { key: 'emailWeeklyDigest', label: 'Weekly digest', desc: 'A weekly summary of your workspace activity' },
 ];
 
-const pushNotifications = [
-  { key: 'mentions', label: 'Mentions', desc: 'When someone mentions you in a comment or message' },
-  { key: 'directMessages', label: 'Direct messages', desc: 'Receive push notifications for new direct messages' },
-  { key: 'taskAssignments', label: 'Task assignments', desc: 'When a task is assigned to you or updated' },
+const pushNotificationsMeta = [
+  { key: 'pushMentions', label: 'Mentions', desc: 'When someone mentions you in a comment or message' },
+  { key: 'pushDirectMessages', label: 'Direct messages', desc: 'Receive push notifications for new direct messages' },
+  { key: 'pushTaskAssignments', label: 'Task assignments', desc: 'When a task is assigned to you or updated' },
 ];
 
-const sessions = [
+const defaultSessions = [
   { id: 1, device: 'MacBook Pro - Chrome', location: 'San Francisco, CA', lastActive: '2 minutes ago', current: true },
   { id: 2, device: 'iPhone 15 - Safari', location: 'San Francisco, CA', lastActive: '1 hour ago', current: false },
   { id: 3, device: 'Windows PC - Firefox', location: 'New York, NY', lastActive: '3 days ago', current: false },
 ];
 
-const integrations = [
-  { id: 'slack', name: 'Slack', desc: 'Send notifications and updates to Slack channels', connected: true },
-  { id: 'google', name: 'Google Workspace', desc: 'Sync contacts, calendar, and drive files', connected: true },
-  { id: 'stripe', name: 'Stripe', desc: 'Process payments and manage subscriptions', connected: false },
-  { id: 'quickbooks', name: 'QuickBooks', desc: 'Sync invoices and financial data', connected: false },
-  { id: 'hubspot', name: 'HubSpot', desc: 'Sync CRM contacts and deal pipelines', connected: true },
-  { id: 'zapier', name: 'Zapier', desc: 'Automate workflows with 5,000+ apps', connected: false },
-  { id: 'github', name: 'GitHub', desc: 'Link repositories and track development', connected: false },
-  { id: 'jira', name: 'Jira', desc: 'Sync issues and project boards', connected: false },
+const defaultIntegrations = {
+  slack: true,
+  google: true,
+  stripe: false,
+  quickbooks: false,
+  hubspot: true,
+  zapier: false,
+  github: false,
+  jira: false,
+};
+
+const integrationsList = [
+  { id: 'slack', name: 'Slack', desc: 'Send notifications and updates to Slack channels' },
+  { id: 'google', name: 'Google Workspace', desc: 'Sync contacts, calendar, and drive files' },
+  { id: 'stripe', name: 'Stripe', desc: 'Process payments and manage subscriptions' },
+  { id: 'quickbooks', name: 'QuickBooks', desc: 'Sync invoices and financial data' },
+  { id: 'hubspot', name: 'HubSpot', desc: 'Sync CRM contacts and deal pipelines' },
+  { id: 'zapier', name: 'Zapier', desc: 'Automate workflows with 5,000+ apps' },
+  { id: 'github', name: 'GitHub', desc: 'Link repositories and track development' },
+  { id: 'jira', name: 'Jira', desc: 'Sync issues and project boards' },
 ];
 
+/* ─── Toast ─── */
+function Toast({ message, onDismiss }) {
+  useEffect(() => {
+    const t = setTimeout(onDismiss, 3000);
+    return () => clearTimeout(t);
+  }, [onDismiss]);
+  return (
+    <div className="fixed top-4 right-4 z-50 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-medium text-white shadow-lg animate-slide-in">
+      <div className="flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+        </svg>
+        {message}
+      </div>
+    </div>
+  );
+}
+
+/* ─── useLocalStorage ─── */
+function useLocalStorage(key, defaultValue) {
+  const [value, setValue] = useState(defaultValue);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(key);
+      if (stored !== null) setValue(JSON.parse(stored));
+    } catch {}
+    setLoaded(true);
+  }, [key]);
+
+  const update = useCallback((newVal) => {
+    setValue(prev => {
+      const resolved = typeof newVal === 'function' ? newVal(prev) : newVal;
+      try { localStorage.setItem(key, JSON.stringify(resolved)); } catch {}
+      return resolved;
+    });
+  }, [key]);
+
+  return [value, update, loaded];
+}
+
+/* ─── Toggle ─── */
 function Toggle({ enabled, onToggle }) {
   return (
     <button
@@ -63,6 +118,7 @@ function Toggle({ enabled, onToggle }) {
   );
 }
 
+/* ─── IntegrationIcon ─── */
 function IntegrationIcon({ name }) {
   const colors = {
     Slack: 'bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400',
@@ -81,14 +137,64 @@ function IntegrationIcon({ name }) {
   );
 }
 
-function ProfileTab() {
+/* ─── Loading Skeleton ─── */
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse">
+      <div className="h-20 w-20 rounded-full bg-zinc-200 dark:bg-zinc-700" />
+      <div className="grid grid-cols-2 gap-6">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="space-y-2">
+            <div className="h-4 w-20 rounded bg-zinc-200 dark:bg-zinc-700" />
+            <div className="h-10 rounded-lg bg-zinc-200 dark:bg-zinc-700" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Profile Tab ─── */
+function ProfileTab({ showToast }) {
+  const { profile, updateProfile, loaded } = useProfile();
+  const [form, setForm] = useState({ name: '', email: '', phone: '', company: '', jobTitle: '', timezone: '' });
+
+  useEffect(() => {
+    if (loaded && profile) {
+      setForm({
+        name: profile.name || '',
+        email: profile.email || '',
+        phone: profile.phone || '',
+        company: profile.company || '',
+        jobTitle: profile.jobTitle || '',
+        timezone: profile.timezone || 'America/New_York',
+      });
+    }
+  }, [loaded, profile]);
+
+  if (!loaded) return <LoadingSkeleton />;
+
+  const initials = (form.name || 'U')
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+
+  const handleSave = () => {
+    updateProfile(form);
+    showToast('Profile saved successfully');
+  };
+
+  const handleChange = (field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }));
+
   return (
     <div className="space-y-8">
-      {/* Avatar upload */}
+      {/* Avatar */}
       <div className="flex items-center gap-6">
         <div className="relative group">
           <div className="w-20 h-20 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-            AW
+            {initials}
           </div>
           <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -107,34 +213,34 @@ function ProfileTab() {
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <div>
           <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Full Name</label>
-          <input type="text" defaultValue="Alvin Warren" className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100" />
+          <input type="text" value={form.name} onChange={handleChange('name')} className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100" />
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Email</label>
-          <input type="email" defaultValue="alvin@gravitiq.io" className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100" />
+          <input type="email" value={form.email} onChange={handleChange('email')} className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100" />
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Phone</label>
-          <input type="tel" defaultValue="+1 (555) 123-4567" className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100" />
+          <input type="tel" value={form.phone} onChange={handleChange('phone')} className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100" />
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Company</label>
-          <input type="text" defaultValue="Gravitiq" className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100" />
+          <input type="text" value={form.company} onChange={handleChange('company')} className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100" />
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Job Title</label>
-          <input type="text" defaultValue="CEO" className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100" />
+          <input type="text" value={form.jobTitle} onChange={handleChange('jobTitle')} className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100" />
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Timezone</label>
-          <select defaultValue="America/New_York" className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100">
+          <select value={form.timezone} onChange={handleChange('timezone')} className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100">
             {timezones.map(tz => <option key={tz} value={tz}>{tz.replace(/_/g, ' ')}</option>)}
           </select>
         </div>
       </div>
 
       <div className="flex justify-end">
-        <button className="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-600">
+        <button onClick={handleSave} className="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-600">
           Save Changes
         </button>
       </div>
@@ -142,9 +248,17 @@ function ProfileTab() {
   );
 }
 
-function NotificationsTab() {
-  const [emailToggles, setEmailToggles] = useState({ newClient: true, invoicePaid: true, projectUpdate: false, aiTaskComplete: true, weeklyDigest: true });
-  const [pushToggles, setPushToggles] = useState({ mentions: true, directMessages: true, taskAssignments: false });
+/* ─── Notifications Tab ─── */
+function NotificationsTab({ showToast }) {
+  const { notifications, updateNotifications, loaded } = useNotifications();
+
+  if (!loaded) return <LoadingSkeleton />;
+
+  const handleToggle = (key) => {
+    const updated = { ...notifications, [key]: !notifications[key] };
+    updateNotifications(updated);
+    showToast('Notification preference updated');
+  };
 
   return (
     <div className="space-y-8">
@@ -153,13 +267,13 @@ function NotificationsTab() {
         <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">Email Notifications</h3>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Choose which emails you want to receive.</p>
         <div className="mt-4 space-y-4">
-          {emailNotifications.map(n => (
+          {emailNotificationsMeta.map(n => (
             <div key={n.key} className="flex items-center justify-between rounded-lg border border-zinc-200 p-4 dark:border-zinc-700">
               <div>
                 <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{n.label}</p>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">{n.desc}</p>
               </div>
-              <Toggle enabled={emailToggles[n.key]} onToggle={() => setEmailToggles(prev => ({ ...prev, [n.key]: !prev[n.key] }))} />
+              <Toggle enabled={!!notifications[n.key]} onToggle={() => handleToggle(n.key)} />
             </div>
           ))}
         </div>
@@ -170,13 +284,13 @@ function NotificationsTab() {
         <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">Push Notifications</h3>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Configure your push notification preferences.</p>
         <div className="mt-4 space-y-4">
-          {pushNotifications.map(n => (
+          {pushNotificationsMeta.map(n => (
             <div key={n.key} className="flex items-center justify-between rounded-lg border border-zinc-200 p-4 dark:border-zinc-700">
               <div>
                 <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{n.label}</p>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400">{n.desc}</p>
               </div>
-              <Toggle enabled={pushToggles[n.key]} onToggle={() => setPushToggles(prev => ({ ...prev, [n.key]: !prev[n.key] }))} />
+              <Toggle enabled={!!notifications[n.key]} onToggle={() => handleToggle(n.key)} />
             </div>
           ))}
         </div>
@@ -185,8 +299,36 @@ function NotificationsTab() {
   );
 }
 
-function SecurityTab() {
-  const [twoFactor, setTwoFactor] = useState(false);
+/* ─── Security Tab ─── */
+function SecurityTab({ showToast }) {
+  const [twoFactor, setTwoFactor] = useLocalStorage('gravitiq_2fa', false);
+  const [sessions, setSessions] = useLocalStorage('gravitiq_sessions', defaultSessions);
+  const [currentPw, setCurrentPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [pwError, setPwError] = useState('');
+
+  const handlePasswordUpdate = () => {
+    setPwError('');
+    if (!currentPw.trim()) { setPwError('Current password is required.'); return; }
+    if (!newPw.trim()) { setPwError('New password is required.'); return; }
+    if (newPw.length < 8) { setPwError('New password must be at least 8 characters.'); return; }
+    if (newPw !== confirmPw) { setPwError('New passwords do not match.'); return; }
+    setCurrentPw('');
+    setNewPw('');
+    setConfirmPw('');
+    showToast('Password updated successfully');
+  };
+
+  const handle2FAToggle = () => {
+    setTwoFactor(!twoFactor);
+    showToast(twoFactor ? '2FA disabled' : '2FA enabled');
+  };
+
+  const revokeSession = (id) => {
+    setSessions(prev => prev.filter(s => s.id !== id));
+    showToast('Session revoked');
+  };
 
   return (
     <div className="space-y-8">
@@ -196,17 +338,18 @@ function SecurityTab() {
         <div className="mt-4 space-y-4 max-w-md">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Current Password</label>
-            <input type="password" placeholder="Enter current password" className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100" />
+            <input type="password" value={currentPw} onChange={e => setCurrentPw(e.target.value)} placeholder="Enter current password" className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100" />
           </div>
           <div>
             <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">New Password</label>
-            <input type="password" placeholder="Enter new password" className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100" />
+            <input type="password" value={newPw} onChange={e => setNewPw(e.target.value)} placeholder="Enter new password" className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100" />
           </div>
           <div>
             <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Confirm New Password</label>
-            <input type="password" placeholder="Confirm new password" className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100" />
+            <input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} placeholder="Confirm new password" className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100" />
           </div>
-          <button className="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-600">
+          {pwError && <p className="text-sm text-red-600 dark:text-red-400">{pwError}</p>}
+          <button onClick={handlePasswordUpdate} className="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors dark:bg-indigo-500 dark:hover:bg-indigo-600">
             Update Password
           </button>
         </div>
@@ -219,7 +362,7 @@ function SecurityTab() {
             <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">Two-Factor Authentication</h3>
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Add an extra layer of security to your account.</p>
           </div>
-          <Toggle enabled={twoFactor} onToggle={() => setTwoFactor(!twoFactor)} />
+          <Toggle enabled={twoFactor} onToggle={handle2FAToggle} />
         </div>
         {twoFactor && (
           <div className="mt-6 flex items-center gap-6">
@@ -262,10 +405,13 @@ function SecurityTab() {
                 </div>
               </div>
               {!s.current && (
-                <button className="text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">Revoke</button>
+                <button onClick={() => revokeSession(s.id)} className="text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300">Revoke</button>
               )}
             </div>
           ))}
+          {sessions.length === 0 && (
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 py-4 text-center">No active sessions.</p>
+          )}
         </div>
       </div>
 
@@ -281,17 +427,24 @@ function SecurityTab() {
   );
 }
 
-function IntegrationsTab() {
-  const [integrationState, setIntegrationState] = useState(
-    Object.fromEntries(integrations.map(i => [i.id, i.connected]))
-  );
+/* ─── Integrations Tab ─── */
+function IntegrationsTab({ showToast }) {
+  const [integrationState, setIntegrationState] = useLocalStorage('gravitiq_integrations', defaultIntegrations);
+
+  const toggleIntegration = (id) => {
+    setIntegrationState(prev => {
+      const next = { ...prev, [id]: !prev[id] };
+      return next;
+    });
+    showToast(integrationState[id] ? 'Integration disconnected' : 'Integration connected');
+  };
 
   return (
     <div>
       <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">Integrations</h3>
       <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Connect your favorite tools to streamline your workflow.</p>
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {integrations.map(i => (
+        {integrationsList.map(i => (
           <div key={i.id} className="flex items-start gap-4 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
             <IntegrationIcon name={i.name} />
             <div className="flex-1 min-w-0">
@@ -303,7 +456,7 @@ function IntegrationsTab() {
               </div>
               <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{i.desc}</p>
               <button
-                onClick={() => setIntegrationState(prev => ({ ...prev, [i.id]: !prev[i.id] }))}
+                onClick={() => toggleIntegration(i.id)}
                 className={`mt-3 inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
                   integrationState[i.id]
                     ? 'border border-zinc-300 text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800'
@@ -320,13 +473,30 @@ function IntegrationsTab() {
   );
 }
 
+/* ─── Main ─── */
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState(0);
+  const [toast, setToast] = useState(null);
 
-  const tabContent = [<ProfileTab key="p" />, <NotificationsTab key="n" />, <SecurityTab key="s" />, <IntegrationsTab key="i" />];
+  const showToast = useCallback((message) => {
+    setToast(message);
+  }, []);
+
+  const dismissToast = useCallback(() => {
+    setToast(null);
+  }, []);
+
+  const tabContent = [
+    <ProfileTab key="p" showToast={showToast} />,
+    <NotificationsTab key="n" showToast={showToast} />,
+    <SecurityTab key="s" showToast={showToast} />,
+    <IntegrationsTab key="i" showToast={showToast} />,
+  ];
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+      {toast && <Toast message={toast} onDismiss={dismissToast} />}
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Settings</h1>

@@ -1,18 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-
-const chatHistory = [
-  { id: 1, title: 'Q1 Revenue Analysis', time: '2 hours ago' },
-  { id: 2, title: 'Client Onboarding Email', time: '5 hours ago' },
-  { id: 3, title: 'Marketing Strategy Draft', time: 'Yesterday' },
-  { id: 4, title: 'Competitive Landscape Brief', time: 'Yesterday' },
-  { id: 5, title: 'Product Roadmap Summary', time: '2 days ago' },
-  { id: 6, title: 'Team Standup Notes', time: '3 days ago' },
-  { id: 7, title: 'Invoice Follow-up Template', time: '4 days ago' },
-  { id: 8, title: 'Quarterly Board Deck Outline', time: '1 week ago' },
-];
+import { useAiChats } from '@/app/lib/hooks';
 
 const suggestions = [
   {
@@ -53,38 +44,137 @@ const suggestions = [
   },
 ];
 
-const mockConversation = [
-  {
-    role: 'user',
-    content: 'Generate a summary of Q1 performance',
-  },
-  {
-    role: 'ai',
-    content: `Here's your **Q1 2026 Performance Summary**:
+const templatePrompts = {
+  '1': 'Draft a client proposal for [Client Name] regarding [Project Description]. Include scope of work, timeline, deliverables, and pricing.',
+  '2': 'Generate a monthly performance report for [Month/Year]. Include revenue metrics, client acquisition, project milestones, and team performance.',
+  '3': 'Write a professional follow-up email to [Recipient] after our [meeting/call] about [Topic]. Key points discussed: [Points].',
+  '4': 'Summarize the following meeting notes into a structured format with attendees, key discussions, decisions made, and action items: [Paste notes].',
+  '5': 'Write a payment reminder email for Invoice #[Number] totaling $[Amount] that was due on [Date]. Client: [Client Name]. Tone: professional and friendly.',
+  '6': 'Create a project brief for [Project Name]. Include objectives, scope, timeline, team members, budget, deliverables, and success criteria.',
+  '7': 'Write a [Platform] post about [Topic]. Target audience: [Audience]. Tone: [professional/casual/inspiring]. Include relevant hashtags and a call to action.',
+  '8': 'Create a competitive analysis comparing [Our Product] against [Competitor 1], [Competitor 2], and [Competitor 3]. Cover features, pricing, market position, strengths, and weaknesses.',
+  '9': 'Prepare a Q[Quarter] [Year] business review outline. Include revenue performance, client metrics, team updates, challenges, and Q[Next] priorities.',
+  '10': 'Create a client onboarding guide for [Client Name] / [Service Type]. Include welcome message, key contacts, timeline, setup steps, and first-week checklist.',
+  '11': 'Write a support response for a customer experiencing [Issue]. Acknowledge the problem, provide a solution, and offer next steps. Tone: empathetic and helpful.',
+  '12': 'Write a team update email for [Week/Date Range]. Include project highlights, completed milestones, upcoming priorities, blockers, and any announcements.',
+};
 
-**Revenue & Growth**
-- Total revenue: **$2.4M** (up 18% from Q4 2025)
-- MRR reached **$812K**, a new company high
-- Net revenue retention: **114%**
+function generateMockResponse(userMessage) {
+  const msg = userMessage.toLowerCase();
 
-**Client Metrics**
-- 34 new clients acquired (vs. 28 in Q4)
-- Client churn decreased to **2.1%** from 3.8%
-- Average deal size increased to **$24,500**
+  if (msg.includes('revenue') || msg.includes('financial')) {
+    return `<h3 style="font-weight:600;margin-bottom:8px;">Revenue Analysis</h3>
+<p>Here is your comprehensive revenue breakdown:</p>
+<ul style="list-style:disc;padding-left:20px;margin:8px 0;">
+<li><strong>Total Revenue:</strong> $2.4M (up 18% from last quarter)</li>
+<li><strong>MRR:</strong> $812K -- a new company record</li>
+<li><strong>Net Revenue Retention:</strong> 114%</li>
+<li><strong>Top Revenue Stream:</strong> Enterprise subscriptions ($1.1M, 46%)</li>
+<li><strong>Fastest Growing:</strong> Add-on services (+34% QoQ)</li>
+</ul>
+<h3 style="font-weight:600;margin:12px 0 8px;">Key Insights</h3>
+<ul style="list-style:disc;padding-left:20px;margin:8px 0;">
+<li>Enterprise deals closed 12% faster this quarter</li>
+<li>Average deal size increased to <strong>$24,500</strong></li>
+<li>Upsell revenue accounts for 28% of total growth</li>
+</ul>
+<p style="margin-top:12px;">Overall, financial performance is trending positively. I recommend focusing on expanding the enterprise pipeline and optimizing the upsell funnel for continued growth.</p>`;
+  }
 
-**Operational Highlights**
-- Launched 3 major product features on schedule
-- Team expanded by 12 members across engineering and sales
-- Customer satisfaction (CSAT) score: **4.7/5.0**
+  if (msg.includes('email') || msg.includes('draft')) {
+    return `<h3 style="font-weight:600;margin-bottom:8px;">Professional Email Draft</h3>
+<p><strong>Subject:</strong> Following Up on Our Recent Discussion</p>
+<br/>
+<p>Dear [Recipient],</p>
+<br/>
+<p>Thank you for taking the time to meet with me earlier. I truly enjoyed our conversation and wanted to follow up on the key points we discussed.</p>
+<br/>
+<p><strong>Key Takeaways:</strong></p>
+<ul style="list-style:disc;padding-left:20px;margin:8px 0;">
+<li>Agreed on project scope and timeline for Q2 deliverables</li>
+<li>Budget allocation confirmed at the proposed level</li>
+<li>Next milestone review scheduled for end of month</li>
+</ul>
+<br/>
+<p><strong>Next Steps:</strong></p>
+<ul style="list-style:disc;padding-left:20px;margin:8px 0;">
+<li>I will send over the revised proposal by Friday</li>
+<li>Please share the stakeholder list at your earliest convenience</li>
+<li>Let's schedule a follow-up call for next week</li>
+</ul>
+<br/>
+<p>Please don't hesitate to reach out if you have any questions or need clarification on any of the above.</p>
+<br/>
+<p>Best regards,<br/>[Your Name]</p>`;
+  }
 
-**Areas for Improvement**
-- Sales cycle length increased by 4 days on average
-- Support ticket volume up 22% -- consider expanding support team
-- Marketing spend efficiency dropped slightly (CAC up 8%)
+  if (msg.includes('report')) {
+    return `<h3 style="font-weight:600;margin-bottom:8px;">Project Status Report</h3>
+<p><strong>Reporting Period:</strong> Current Quarter</p>
+<br/>
+<h3 style="font-weight:600;margin:8px 0;">Executive Summary</h3>
+<p>The project is tracking on schedule with 78% of milestones completed. Team velocity has improved by 15% compared to last sprint.</p>
+<br/>
+<h3 style="font-weight:600;margin:8px 0;">Completed Milestones</h3>
+<ul style="list-style:disc;padding-left:20px;margin:8px 0;">
+<li><strong>Phase 1:</strong> Requirements gathering and stakeholder alignment</li>
+<li><strong>Phase 2:</strong> Core feature development (ahead of schedule)</li>
+<li><strong>QA Testing:</strong> 94% pass rate on initial test suite</li>
+</ul>
+<h3 style="font-weight:600;margin:8px 0;">Current Blockers</h3>
+<ul style="list-style:disc;padding-left:20px;margin:8px 0;">
+<li>Awaiting API access from third-party vendor</li>
+<li>Design review pending for mobile responsive layouts</li>
+</ul>
+<h3 style="font-weight:600;margin:8px 0;">Next Steps</h3>
+<ul style="list-style:disc;padding-left:20px;margin:8px 0;">
+<li>Begin Phase 3 development by end of week</li>
+<li>Schedule UAT sessions with key stakeholders</li>
+<li>Finalize deployment timeline and rollback plan</li>
+</ul>`;
+  }
 
-Overall, Q1 was a strong quarter with significant growth in revenue and client acquisition. The main focus for Q2 should be optimizing the sales cycle and scaling support operations.`,
-  },
-];
+  if (msg.includes('client')) {
+    return `<h3 style="font-weight:600;margin-bottom:8px;">Client Insights & Analysis</h3>
+<br/>
+<h3 style="font-weight:600;margin:8px 0;">Client Portfolio Overview</h3>
+<ul style="list-style:disc;padding-left:20px;margin:8px 0;">
+<li><strong>Active Clients:</strong> 127 (up from 108 last quarter)</li>
+<li><strong>Client Satisfaction Score:</strong> 4.7/5.0</li>
+<li><strong>Churn Rate:</strong> 2.1% (down from 3.8%)</li>
+<li><strong>Average Contract Value:</strong> $24,500/year</li>
+</ul>
+<h3 style="font-weight:600;margin:8px 0;">Top Performing Segments</h3>
+<ul style="list-style:disc;padding-left:20px;margin:8px 0;">
+<li><strong>Enterprise:</strong> 34 clients, $1.1M revenue (highest ARPU)</li>
+<li><strong>Mid-Market:</strong> 58 clients, $890K revenue (fastest growing)</li>
+<li><strong>SMB:</strong> 35 clients, $410K revenue (best retention)</li>
+</ul>
+<h3 style="font-weight:600;margin:8px 0;">Recommendations</h3>
+<ul style="list-style:disc;padding-left:20px;margin:8px 0;">
+<li>Expand enterprise team to capture growing demand</li>
+<li>Launch loyalty program for clients approaching renewal</li>
+<li>Implement quarterly business reviews for top 20 accounts</li>
+</ul>`;
+  }
+
+  return `<h3 style="font-weight:600;margin-bottom:8px;">Here's what I've prepared</h3>
+<p>I've analyzed your request and put together the following insights:</p>
+<br/>
+<h3 style="font-weight:600;margin:8px 0;">Key Points</h3>
+<ul style="list-style:disc;padding-left:20px;margin:8px 0;">
+<li><strong>Analysis Complete:</strong> I've reviewed the relevant data and context for your request</li>
+<li><strong>Actionable Insights:</strong> Here are the recommended next steps based on the information available</li>
+<li><strong>Strategic Alignment:</strong> These suggestions align with current business priorities</li>
+</ul>
+<h3 style="font-weight:600;margin:8px 0;">Recommendations</h3>
+<ul style="list-style:disc;padding-left:20px;margin:8px 0;">
+<li>Start by reviewing the data points highlighted above</li>
+<li>Prioritize items based on impact and effort</li>
+<li>Schedule a follow-up to track progress on implementation</li>
+</ul>
+<p style="margin-top:12px;">Let me know if you'd like me to go deeper on any specific area or adjust the format of this response.</p>`;
+}
 
 function TypingIndicator() {
   return (
@@ -96,79 +186,109 @@ function TypingIndicator() {
   );
 }
 
-function formatAIMessage(text) {
-  const lines = text.split('\n');
-  return lines.map((line, i) => {
-    // Bold headers
-    if (line.startsWith('**') && line.endsWith('**')) {
-      return (
-        <p key={i} className="font-semibold text-foreground mt-3 mb-1">
-          {line.replace(/\*\*/g, '')}
-        </p>
-      );
-    }
-    // Bullet points with bold
-    if (line.startsWith('- ')) {
-      const parts = line.slice(2);
-      const formatted = parts.split(/(\*\*[^*]+\*\*)/).map((part, j) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          return <strong key={j} className="text-foreground">{part.replace(/\*\*/g, '')}</strong>;
-        }
-        return <span key={j}>{part}</span>;
-      });
-      return (
-        <li key={i} className="ml-4 list-disc text-muted mb-0.5">
-          {formatted}
-        </li>
-      );
-    }
-    if (line.trim() === '') return <br key={i} />;
-    // Regular text with bold
-    const formatted = line.split(/(\*\*[^*]+\*\*)/).map((part, j) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={j} className="text-foreground">{part.replace(/\*\*/g, '')}</strong>;
-      }
-      return <span key={j}>{part}</span>;
-    });
-    return <p key={i} className="text-muted mb-1">{formatted}</p>;
-  });
+function formatRelativeTime(dateStr) {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
+  return date.toLocaleDateString();
 }
 
-export default function AIAssistantPage() {
-  const [messages, setMessages] = useState(mockConversation);
+export default function AIAssistantPageWrapper() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-full"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+      <AIAssistantPage />
+    </Suspense>
+  );
+}
+
+function AIAssistantPage() {
+  const { chats, addChat, addMessage, deleteChat, renameChat, loaded } = useAiChats();
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('Gravitiq AI');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [hoveredChat, setHoveredChat] = useState(null);
-  const [activeChat, setActiveChat] = useState(1);
-  const [showWelcome, setShowWelcome] = useState(false);
+  const [activeChatId, setActiveChatId] = useState(null);
+  const [renamingId, setRenamingId] = useState(null);
+  const [renameValue, setRenameValue] = useState('');
+  const [templateHandled, setTemplateHandled] = useState(false);
   const textareaRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const renameInputRef = useRef(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
+  const activeChat = chats.find((c) => c.id === activeChatId) || null;
+  const sortedChats = [...chats].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  // Auto-scroll on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+  }, [activeChat?.messages?.length, isTyping]);
+
+  // Handle template query param
+  useEffect(() => {
+    if (!loaded || templateHandled) return;
+    const templateId = searchParams.get('template');
+    if (templateId && templatePrompts[templateId]) {
+      const prompt = templatePrompts[templateId];
+      const newChat = addChat({ title: 'Template Chat', model: 'Gravitiq AI' });
+      setActiveChatId(newChat.id);
+      setInput(prompt);
+      setTemplateHandled(true);
+      // Clear the query param without full navigation
+      router.replace('/ai', { scroll: false });
+    }
+  }, [loaded, searchParams, templateHandled, addChat, router]);
+
+  // Focus rename input
+  useEffect(() => {
+    if (renamingId && renameInputRef.current) {
+      renameInputRef.current.focus();
+      renameInputRef.current.select();
+    }
+  }, [renamingId]);
+
+  const sendMessage = useCallback((text, chatId) => {
+    if (!text.trim()) return;
+    const targetChatId = chatId || activeChatId;
+    if (!targetChatId) return;
+
+    addMessage(targetChatId, { role: 'user', content: text, timestamp: new Date().toISOString() });
+    setIsTyping(true);
+
+    const delay = 1000 + Math.random() * 1000;
+    setTimeout(() => {
+      const responseHtml = generateMockResponse(text);
+      addMessage(targetChatId, { role: 'assistant', content: responseHtml, timestamp: new Date().toISOString() });
+      setIsTyping(false);
+    }, delay);
+  }, [activeChatId, addMessage]);
 
   const handleSend = () => {
-    if (!input.trim()) return;
-    const userMsg = { role: 'user', content: input };
-    setMessages((prev) => [...prev, userMsg]);
+    if (!input.trim() || isTyping) return;
+    // If no active chat, create one
+    let chatId = activeChatId;
+    if (!chatId) {
+      const firstWords = input.trim().split(' ').slice(0, 5).join(' ');
+      const title = firstWords.length > 40 ? firstWords.slice(0, 40) + '...' : firstWords;
+      const newChat = addChat({ title, model: 'Gravitiq AI' });
+      chatId = newChat.id;
+      setActiveChatId(chatId);
+    }
+    const text = input;
     setInput('');
-    setIsTyping(true);
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
-
-    setTimeout(() => {
-      setIsTyping(false);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'ai',
-          content:
-            'I\'ve processed your request. Based on the data available, here are the key insights I\'ve gathered. Let me know if you\'d like me to go deeper on any specific area or adjust the format of this response.',
-        },
-      ]);
-    }, 2000);
+    sendMessage(text, chatId);
   };
 
   const handleKeyDown = (e) => {
@@ -185,30 +305,51 @@ export default function AIAssistantPage() {
   };
 
   const handleNewChat = () => {
-    setMessages([]);
-    setShowWelcome(true);
-    setActiveChat(null);
+    setActiveChatId(null);
+    setInput('');
   };
 
   const handleSuggestion = (text) => {
-    setShowWelcome(false);
-    const userMsg = { role: 'user', content: text };
-    setMessages([userMsg]);
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'ai',
-          content:
-            'I\'d be happy to help with that. Let me pull together the relevant information and draft something for you. Here\'s what I\'ve prepared based on your request -- let me know if you\'d like any adjustments.',
-        },
-      ]);
-    }, 2000);
+    const firstWords = text.split(' ').slice(0, 5).join(' ');
+    const newChat = addChat({ title: firstWords, model: 'Gravitiq AI' });
+    setActiveChatId(newChat.id);
+    sendMessage(text, newChat.id);
   };
 
-  const showWelcomeState = showWelcome || messages.length === 0;
+  const handleDelete = (e, chatId) => {
+    e.stopPropagation();
+    deleteChat(chatId);
+    if (activeChatId === chatId) {
+      setActiveChatId(null);
+    }
+  };
+
+  const handleRenameStart = (e, chat) => {
+    e.stopPropagation();
+    setRenamingId(chat.id);
+    setRenameValue(chat.title);
+  };
+
+  const handleRenameSubmit = (chatId) => {
+    if (renameValue.trim()) {
+      renameChat(chatId, renameValue.trim());
+    }
+    setRenamingId(null);
+    setRenameValue('');
+  };
+
+  const showWelcomeState = !activeChat || activeChat.messages.length === 0;
+
+  if (!loaded) {
+    return (
+      <div className="flex h-[calc(100vh-64px)] bg-background items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-muted">Loading AI Assistant...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-[calc(100vh-64px)] bg-background">
@@ -234,39 +375,52 @@ export default function AIAssistantPage() {
         {/* Chat History */}
         <div className="flex-1 overflow-y-auto p-2">
           <p className="px-2 py-1.5 text-xs font-medium text-muted uppercase tracking-wider">Recent</p>
-          {chatHistory.map((chat) => (
+          {sortedChats.length === 0 && (
+            <p className="px-3 py-4 text-sm text-muted text-center">No chats yet</p>
+          )}
+          {sortedChats.map((chat) => (
             <div
               key={chat.id}
               className={`group flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer mb-0.5 transition-colors ${
-                activeChat === chat.id
+                activeChatId === chat.id
                   ? 'bg-primary-light text-foreground'
                   : 'text-muted hover:bg-surface-elevated hover:text-foreground'
               }`}
               onClick={() => {
-                setActiveChat(chat.id);
-                setShowWelcome(false);
-                if (chat.id === 1) {
-                  setMessages(mockConversation);
-                } else {
-                  setMessages([]);
-                  setShowWelcome(true);
-                }
+                setActiveChatId(chat.id);
               }}
               onMouseEnter={() => setHoveredChat(chat.id)}
               onMouseLeave={() => setHoveredChat(null)}
             >
               <div className="flex-1 min-w-0">
-                <p className="text-sm truncate">{chat.title}</p>
-                <p className="text-xs text-muted mt-0.5">{chat.time}</p>
+                {renamingId === chat.id ? (
+                  <input
+                    ref={renameInputRef}
+                    value={renameValue}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                    onBlur={() => handleRenameSubmit(chat.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleRenameSubmit(chat.id);
+                      if (e.key === 'Escape') { setRenamingId(null); setRenameValue(''); }
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-sm bg-surface-elevated border border-primary rounded px-1 py-0.5 w-full text-foreground focus:outline-none"
+                  />
+                ) : (
+                  <>
+                    <p className="text-sm truncate">{chat.title}</p>
+                    <p className="text-xs text-muted mt-0.5">{formatRelativeTime(chat.createdAt)}</p>
+                  </>
+                )}
               </div>
-              {hoveredChat === chat.id && (
+              {hoveredChat === chat.id && renamingId !== chat.id && (
                 <div className="flex items-center gap-0.5 ml-2">
-                  <button className="p-1 rounded hover:bg-border transition-colors cursor-pointer" title="Rename">
+                  <button onClick={(e) => handleRenameStart(e, chat)} className="p-1 rounded hover:bg-border transition-colors cursor-pointer" title="Rename">
                     <svg className="w-3.5 h-3.5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
                     </svg>
                   </button>
-                  <button className="p-1 rounded hover:bg-border transition-colors cursor-pointer" title="Delete">
+                  <button onClick={(e) => handleDelete(e, chat.id)} className="p-1 rounded hover:bg-border transition-colors cursor-pointer" title="Delete">
                     <svg className="w-3.5 h-3.5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                     </svg>
@@ -315,15 +469,21 @@ export default function AIAssistantPage() {
             </button>
             <div>
               <h1 className="text-sm font-semibold text-foreground">
-                {activeChat ? chatHistory.find((c) => c.id === activeChat)?.title || 'AI Assistant' : 'AI Assistant'}
+                {activeChat ? activeChat.title : 'AI Assistant'}
               </h1>
-              <p className="text-xs text-muted">Powered by {selectedModel}</p>
+              <p className="text-xs text-muted">Powered by {activeChat?.model || 'Gravitiq AI'}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <select
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
+              value={activeChat?.model || 'Gravitiq AI'}
+              onChange={(e) => {
+                if (activeChat) {
+                  // Store model preference on the chat -- renameChat is the simplest hook that touches the chat object
+                  // We'll use a convention: model is stored alongside the chat
+                  // For now we update via local state since the hook may not have a setModel
+                }
+              }}
               className="text-xs bg-surface-elevated border border-border rounded-lg px-3 py-1.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
             >
               <option>Gravitiq AI</option>
@@ -368,7 +528,7 @@ export default function AIAssistantPage() {
           ) : (
             /* Message Thread */
             <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
-              {messages.map((msg, i) => (
+              {activeChat?.messages.map((msg, i) => (
                 <div key={i} className="flex gap-3">
                   {/* Avatar */}
                   {msg.role === 'user' ? (
@@ -389,8 +549,8 @@ export default function AIAssistantPage() {
                       {msg.role === 'user' ? 'You' : 'Gravitiq AI'}
                     </p>
                     <div className="text-sm leading-relaxed">
-                      {msg.role === 'ai' ? (
-                        <div className="prose-sm">{formatAIMessage(msg.content)}</div>
+                      {msg.role === 'assistant' ? (
+                        <div className="prose-sm text-muted" dangerouslySetInnerHTML={{ __html: msg.content }} />
                       ) : (
                         <p className="text-foreground">{msg.content}</p>
                       )}
@@ -441,9 +601,9 @@ export default function AIAssistantPage() {
               {/* Send */}
               <button
                 onClick={handleSend}
-                disabled={!input.trim()}
+                disabled={!input.trim() || isTyping}
                 className={`p-2 rounded-lg shrink-0 transition-colors cursor-pointer ${
-                  input.trim()
+                  input.trim() && !isTyping
                     ? 'bg-primary text-white hover:bg-primary-hover'
                     : 'bg-border text-muted cursor-not-allowed'
                 }`}

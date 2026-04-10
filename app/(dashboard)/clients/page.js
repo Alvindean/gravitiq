@@ -2,17 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-
-const mockClients = [
-  { id: 1, name: 'Sarah Mitchell', company: 'TechFlow Inc', email: 'sarah@techflow.io', status: 'Active', revenue: 18750, lastActivity: '2026-04-08', color: '#4f46e5' },
-  { id: 2, name: 'James Rodriguez', company: 'BrightPath Labs', email: 'james@brightpath.com', status: 'Active', revenue: 24300, lastActivity: '2026-04-09', color: '#06b6d4' },
-  { id: 3, name: 'Emily Chen', company: 'Quantum Dynamics', email: 'emily@quantumdyn.co', status: 'Active', revenue: 31200, lastActivity: '2026-04-07', color: '#8b5cf6' },
-  { id: 4, name: 'Marcus Thompson', company: 'Apex Ventures', email: 'marcus@apexvc.com', status: 'Inactive', revenue: 8400, lastActivity: '2026-03-15', color: '#f59e0b' },
-  { id: 5, name: 'Olivia Parker', company: 'Nova Creative', email: 'olivia@novacreative.io', status: 'Active', revenue: 15600, lastActivity: '2026-04-10', color: '#ec4899' },
-  { id: 6, name: 'Daniel Kim', company: 'Stellar Systems', email: 'daniel@stellarsys.com', status: 'Prospect', revenue: 0, lastActivity: '2026-04-05', color: '#10b981' },
-  { id: 7, name: 'Rachel Foster', company: 'Luminary Design', email: 'rachel@luminary.co', status: 'Active', revenue: 12450, lastActivity: '2026-04-06', color: '#f97316' },
-  { id: 8, name: 'Alex Nguyen', company: 'Horizon Tech', email: 'alex@horizontech.dev', status: 'Inactive', revenue: 5200, lastActivity: '2026-02-28', color: '#6366f1' },
-];
+import { useClients, useActivities } from '@/app/lib/hooks';
 
 function StatusBadge({ status }) {
   const styles = {
@@ -21,47 +11,161 @@ function StatusBadge({ status }) {
     Prospect: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
   };
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status]}`}>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status] || styles.Active}`}>
       {status}
     </span>
   );
 }
 
 function Avatar({ name, color, size = 'md' }) {
-  const initials = name.split(' ').map(n => n[0]).join('');
+  const initials = (name || '').split(' ').map(n => n[0]).join('');
   const sizes = { sm: 'w-8 h-8 text-xs', md: 'w-10 h-10 text-sm', lg: 'w-12 h-12 text-base' };
   return (
-    <div className={`${sizes[size]} rounded-full flex items-center justify-center text-white font-semibold shrink-0`} style={{ backgroundColor: color }}>
+    <div className={`${sizes[size]} rounded-full flex items-center justify-center text-white font-semibold shrink-0`} style={{ backgroundColor: color || '#6366f1' }}>
       {initials}
     </div>
   );
 }
 
+function LoadingSkeleton() {
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <div className="h-8 w-32 bg-surface-elevated rounded animate-pulse" />
+            <div className="h-4 w-24 bg-surface-elevated rounded animate-pulse mt-2" />
+          </div>
+          <div className="h-10 w-32 bg-surface-elevated rounded-lg animate-pulse" />
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="flex-1 h-10 bg-surface-elevated rounded-lg animate-pulse" />
+          <div className="h-10 w-36 bg-surface-elevated rounded-lg animate-pulse" />
+          <div className="h-10 w-36 bg-surface-elevated rounded-lg animate-pulse" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-surface border border-border rounded-xl p-5 animate-pulse">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-surface-elevated" />
+                <div className="flex-1">
+                  <div className="h-4 w-28 bg-surface-elevated rounded mb-2" />
+                  <div className="h-3 w-20 bg-surface-elevated rounded" />
+                </div>
+              </div>
+              <div className="h-3 w-40 bg-surface-elevated rounded mb-3" />
+              <div className="flex items-center justify-between pt-3 border-t border-border">
+                <div className="h-4 w-16 bg-surface-elevated rounded" />
+                <div className="h-4 w-16 bg-surface-elevated rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AddClientModal({ onClose, onAdd }) {
+  const [form, setForm] = useState({ name: '', company: '', email: '', phone: '', status: 'Active' });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!form.name.trim() || !form.email.trim()) return;
+    const colors = ['#4f46e5', '#06b6d4', '#8b5cf6', '#f59e0b', '#ec4899', '#10b981', '#f97316', '#6366f1'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    onAdd({
+      ...form,
+      color,
+      revenue: 0,
+      lastActivity: new Date().toISOString().split('T')[0],
+      notes: [],
+    });
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+      <div className="bg-surface border border-border rounded-xl p-6 w-full max-w-md mx-4 shadow-xl" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-lg font-semibold text-foreground">Add New Client</h2>
+          <button onClick={onClose} className="text-muted hover:text-foreground transition-colors">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Name *</label>
+            <input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required className="w-full px-3 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" placeholder="Full name" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Company</label>
+            <input type="text" value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))} className="w-full px-3 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" placeholder="Company name" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Email *</label>
+            <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required className="w-full px-3 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" placeholder="email@example.com" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Phone</label>
+            <input type="text" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} className="w-full px-3 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" placeholder="+1 (555) 000-0000" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Status</label>
+            <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))} className="w-full px-3 py-2.5 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="Prospect">Prospect</option>
+            </select>
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 border border-border rounded-lg text-foreground hover:bg-surface-elevated transition-colors text-sm font-medium">Cancel</button>
+            <button type="submit" className="flex-1 px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm font-medium">Add Client</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function ClientsPage() {
+  const { clients, addClient, loaded } = useClients();
+  const { addActivity } = useActivities();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [sortBy, setSortBy] = useState('name');
   const [viewMode, setViewMode] = useState('grid');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showAddModal, setShowAddModal] = useState(false);
   const perPage = 6;
 
   const filtered = useMemo(() => {
-    let list = mockClients.filter(c => {
-      const matchSearch = c.name.toLowerCase().includes(search.toLowerCase()) || c.company.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase());
+    let list = (clients || []).filter(c => {
+      const q = search.toLowerCase();
+      const matchSearch = (c.name || '').toLowerCase().includes(q) || (c.company || '').toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q);
       const matchStatus = statusFilter === 'All' || c.status === statusFilter;
       return matchSearch && matchStatus;
     });
     list.sort((a, b) => {
-      if (sortBy === 'name') return a.name.localeCompare(b.name);
-      if (sortBy === 'revenue') return b.revenue - a.revenue;
-      if (sortBy === 'recent') return new Date(b.lastActivity) - new Date(a.lastActivity);
+      if (sortBy === 'name') return (a.name || '').localeCompare(b.name || '');
+      if (sortBy === 'revenue') return (b.revenue || 0) - (a.revenue || 0);
+      if (sortBy === 'recent') return new Date(b.lastActivity || 0) - new Date(a.lastActivity || 0);
       return 0;
     });
     return list;
-  }, [search, statusFilter, sortBy]);
+  }, [clients, search, statusFilter, sortBy]);
 
   const totalPages = Math.ceil(filtered.length / perPage);
   const paginated = filtered.slice((currentPage - 1) * perPage, currentPage * perPage);
+
+  const handleAddClient = (clientData) => {
+    addClient(clientData);
+    if (addActivity) {
+      addActivity({ description: `New client ${clientData.name} added`, type: 'client', timestamp: new Date().toISOString() });
+    }
+  };
+
+  if (!loaded) return <LoadingSkeleton />;
 
   return (
     <div className="min-h-screen bg-background">
@@ -72,7 +176,7 @@ export default function ClientsPage() {
             <h1 className="text-2xl font-bold text-foreground">Clients</h1>
             <p className="text-muted mt-1">{filtered.length} total clients</p>
           </div>
-          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-primary-hover transition-colors">
+          <button onClick={() => setShowAddModal(true)} className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-primary-hover transition-colors">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
             Add Client
           </button>
@@ -137,11 +241,11 @@ export default function ClientsPage() {
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <div>
                     <p className="text-xs text-muted">Revenue</p>
-                    <p className="text-sm font-semibold text-foreground">${client.revenue.toLocaleString()}</p>
+                    <p className="text-sm font-semibold text-foreground">${(client.revenue || 0).toLocaleString()}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-muted">Last Activity</p>
-                    <p className="text-sm text-foreground">{new Date(client.lastActivity).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                    <p className="text-sm text-foreground">{client.lastActivity ? new Date(client.lastActivity).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A'}</p>
                   </div>
                 </div>
               </Link>
@@ -175,8 +279,8 @@ export default function ClientsPage() {
                       </td>
                       <td className="px-5 py-4 text-sm text-muted hidden sm:table-cell">{client.email}</td>
                       <td className="px-5 py-4"><StatusBadge status={client.status} /></td>
-                      <td className="px-5 py-4 text-sm text-foreground text-right font-medium">${client.revenue.toLocaleString()}</td>
-                      <td className="px-5 py-4 text-sm text-muted text-right hidden md:table-cell">{new Date(client.lastActivity).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+                      <td className="px-5 py-4 text-sm text-foreground text-right font-medium">${(client.revenue || 0).toLocaleString()}</td>
+                      <td className="px-5 py-4 text-sm text-muted text-right hidden md:table-cell">{client.lastActivity ? new Date(client.lastActivity).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -228,6 +332,8 @@ export default function ClientsPage() {
           </div>
         )}
       </div>
+
+      {showAddModal && <AddClientModal onClose={() => setShowAddModal(false)} onAdd={handleAddClient} />}
     </div>
   );
 }
